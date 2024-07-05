@@ -1,0 +1,41 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f8f9fa;
+    font-family: 'Arial', sans-serif;
+}
+
+form {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+form:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+form i {
+    color: #dc3545;
+    margin-bottom: 15px;
+}
+
+form p.lead {
+    font-size: 1.25rem;
+    margin-bottom: 20px;
+}
+
+form button.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+form button.btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}

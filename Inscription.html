@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Inclusion des styles Bootstrap -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Inclusion des icônes FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <title>Inscription</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8f9fa;
+        }
+        .inscription {
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        .inscription h1 {
+            margin-bottom: 30px;
+        }
+        .inscription .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .inscription .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .inscription .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        .error {
+            color: red;
+            font-size: 0.9em;
+        }
+        .toggle-password {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="inscription">
+        <h1 class="text-center">Inscription</h1>
+        <form id="inscriptionForm" action="inscription.php" method="POST">
+            <!-- Champ pour le nom -->
+            <div class="form-group">
+                <label for="nom">Nom :</label>
+                <input type="text" class="form-control" id="nom" name="nom" required>
+            </div>
+            <!-- Champ pour le prénom -->
+            <div class="form-group">
+                <label for="prenom">Prénom :</label>
+                <input type="text" class="form-control" id="prenom" name="prenom" required>
+            </div>
+            <!-- Champ pour l'email -->
+            <div class="form-group">
+                <label for="email">Email :</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+            <!-- Champ pour le mot de passe -->
+            <div class="form-group">
+                <label for="password">Mot de passe :</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+                <small id="passwordHelp" class="form-text text-muted">Le mot de passe doit contenir au moins 8 caractères, une majuscule, un chiffre et un symbole.</small>
+                <div id="passwordError" class="error"></div>
+                <!-- Bouton pour afficher/masquer le mot de passe -->
+                <span class="toggle-password" onclick="togglePasswordVisibility()">
+                    <i class="fas fa-eye"></i>
+                </span>
+            </div>
+            <!-- Bouton pour soumettre le formulaire -->
+            <button type="submit" class="btn btn-primary btn-block">S'inscrire</button>
+        </form>
+    </div>
+
+    <script>
+        // Fonction pour basculer la visibilité du mot de passe
+        function togglePasswordVisibility() {
+            const passwordField = document.getElementById('password');
+            const passwordFieldType = passwordField.getAttribute('type');
+            const togglePasswordIcon = document.querySelector('.toggle-password i');
+            if (passwordFieldType === 'password') {
+                passwordField.setAttribute('type', 'text');
+                togglePasswordIcon.classList.remove('fa-eye');
+                togglePasswordIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordField.setAttribute('type', 'password');
+                togglePasswordIcon.classList.remove('fa-eye-slash');
+                togglePasswordIcon.classList.add('fa-eye');
+            }
+        }
+
+        // Fonction de validation du mot de passe
+        function validatePassword() {
+            const password = document.getElementById('password').value;
+            const passwordError = document.getElementById('passwordError');
+            const passwordPattern = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^+&*])[A-Za-z\d!@#+$%^&*]{8,}$/;
+
+            if (!passwordPattern.test(password)) {
+                passwordError.textContent = 'Le mot de passe doit contenir au moins 8 caractères, une majuscule, un chiffre et un symbole.';
+                return false;
+            } else {
+                passwordError.textContent = '';
+                return true;
+            }
+        }
+
+        // Validation du mot de passe lors de la soumission du formulaire
+        document.getElementById('inscriptionForm').addEventListener('submit', function(event) {
+            if (!validatePassword()) {
+                event.preventDefault();
+            }
+        });
+
+        // Validation du mot de passe lors de la modification du mot de passe
+        document.getElementById('password').addEventListener('input', function() {
+            validatePassword();
+        });
+    </script>
+</body>
+</html>

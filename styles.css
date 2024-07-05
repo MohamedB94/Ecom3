@@ -1,0 +1,13 @@
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.btn-ajouter {
+    margin-right: 10px; /* Ajoute de l'espace entre les boutons */
+}
+
+.btn-acheter {
+    margin-left: 10px; /* Ajoute de l'espace entre les boutons */
+}

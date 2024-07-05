@@ -1,0 +1,91 @@
+/* Réinitialiser certains styles par défaut */
+body, html, div, h1, p {
+    margin: 0;
+    padding: 0;
+}
+
+/* Style du corps */
+body {
+    font-family: 'Open Sans', sans-serif;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    color: #495057;
+}
+
+/* Style du conteneur div */
+.connexion {
+    background-color: white;
+    padding: 50px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    width: 400px;
+}
+
+/* Style de l'en-tête */
+h1 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 24px;
+    text-align: center;
+}
+
+/* Style du texte du paragraphe */
+p {
+    margin-bottom: 30px;
+    line-height: 1.6;
+    text-align: center;
+}
+
+/* Style des étiquettes et des entrées du formulaire */
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+input[type="text"], input[type="password"], input[type="email"] {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 25px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 18px; /* Augmentez la taille de la police */
+}
+input[type="email"] {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 25px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 18px; /* Augmentez la taille de la police */
+}
+input[type="submit"] {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 18px; /* Augmentez la taille de la police */
+}
+input[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+/* Style du lien d'inscription */
+a {
+    color: #007BFF;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 15px;
+}
+
+a:hover {
+    text-decoration: underline;
+}
