@@ -1,0 +1,21 @@
+"Développer un site Web marchant (ou l’équivalent) comportant : 
+
+•	Vitrine à la page d’accueil
+•	Barre de recherche permettant de rechercher un produit souhaité
+•	Gestion d’utilisateurs : Inscription et authentification pour les inscrits
+•	Gestion de caddie, choix de produits, validation
+•	Vue Admin pour gestion de stock et validation des commandes
+•	Technos utilisés : HTML5, CSS3 (Bootstap), JavaScript, PHP 7, Mysql
+•	Notes accordées aux produits de 1 à 5 étoiles. Moyenne affichée
+•	Le site doit fonctionner sur tous les navigateurs et tous les formats d’affichage
+
+Sécurité :
+
+•	Complexité du mot de passe
+•	Page d’inscription avec validation des champs en JavaScript
+•	Mot de passe haché sur la base de données
+•	Au moins une procédure stockée en JavaScript
+•	Site admin intégrant la protection de toutes les pages par des variables sessions
+•	Eviter les attaques avec un facteur de retardement (captcha, question math,…)
+•	Sauvegarde du code sur un drive, Git ou autre
+"
