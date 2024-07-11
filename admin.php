@@ -63,45 +63,16 @@ $conn->close(); // Ferme la connexion à la base de données
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ajouter un produit</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="admin.css">
-    <style>
-        .product-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        .product {
-            position: relative;
-            width: 200px;
-            text-align: center;
-        }
-        .product img {
-            width: 100%;
-            cursor: pointer;
-        }
-        .product-options {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-        }
-        .product:hover .product-options {
-            display: flex;
-        }
-    </style>
 </head>
 <body>
     <div class="container">
         <h1>Ajouter un produit</h1>
-        <a href="logout.php">Déconnexion</a>
-        <a href="index.php">Accueil</a>
+        <div class="d-flex justify-content-between mb-3">
+            <a href="logout.php" class="btn btn-link">Déconnexion</a>
+            <a href="index.php" class="btn btn-link">Accueil</a>
+        </div>
         <!-- Combo box pour sélectionner un produit -->
         <select id="productSelect" class="form-control mb-3">
             <option value="">Sélectionner un produit</option>
@@ -113,25 +84,39 @@ $conn->close(); // Ferme la connexion à la base de données
         <form action="admin.php" method="post">
             <input type="hidden" name="id" id="id">
             <input type="hidden" name="action" id="action" value="ajouter">
-            <label for="produits">Produits:</label>
-            <select id="produits" name="produits" class="form-control" required>
-                <option value="Ordinateur">Ordinateur</option>
-                <option value="Périphériques">Périphériques</option>
-                <option value="Composants">Composants</option>
-            </select>
-            <label for="nom">Nom:</label>
-            <input type="text" id="nom" name="nom" class="form-control" required>
-            <label for="fabricant">Fabricant:</label>
-            <input type="text" id="fabricant" name="fabricant" class="form-control" required>
-            <label for="description">Description:</label>
-            <textarea id="description" name="description" class="form-control" required></textarea>
-            <label for="prix">Prix:</label>
-            <input type="number" id="prix" name="prix" class="form-control" step="0.01" required>
-            <label for="image">Image (URL):</label>
-            <input type="text" id="image" name="image" class="form-control" required>
-            <input type="submit" value="Ajouter le produit" onclick="document.getElementById('action').value='ajouter'">
-            <input type="submit" value="Modifier le produit" onclick="document.getElementById('action').value='modifier'">
-            <input type="submit" value="Supprimer le produit" onclick="document.getElementById('action').value='supprimer'">
+            <div class="form-group">
+                <label for="produits">Produits:</label>
+                <select id="produits" name="produits" class="form-control" required>
+                    <option value="Ordinateur">Ordinateur</option>
+                    <option value="Périphériques">Périphériques</option>
+                    <option value="Composants">Composants</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="nom">Nom:</label>
+                <input type="text" id="nom" name="nom" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="fabricant">Fabricant:</label>
+                <input type="text" id="fabricant" name="fabricant" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea id="description" name="description" class="form-control" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="prix">Prix:</label>
+                <input type="number" id="prix" name="prix" class="form-control" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="image">Image (URL):</label>
+                <input type="text" id="image" name="image" class="form-control" required>
+            </div>
+            <div class="action-buttons">
+                <input type="submit" value="Ajouter le produit" class="btn btn-primary" onclick="document.getElementById('action').value='ajouter'">
+                <input type="submit" value="Modifier le produit" class="btn btn-secondary" onclick="document.getElementById('action').value='modifier'">
+                <input type="submit" value="Supprimer le produit" class="btn btn-danger" onclick="document.getElementById('action').value='supprimer'">
+            </div>
         </form>
     </div>
     <script>
