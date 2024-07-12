@@ -82,13 +82,21 @@ session_start();
             // Vérifier si des résultats ont été trouvés
             if ($result->num_rows > 0) {
                 while ($row = $result->fetch_assoc()) {
+                    // Calculer la moyenne des notes
+                    $id_modele = $row['id_modele'];
+                    $sql_notes = "SELECT AVG(note) as moyenne FROM notes WHERE id_modele = $id_modele";
+                    $result_notes = $conn->query($sql_notes);
+                    $moyenne = $result_notes->fetch_assoc()['moyenne'];
+                    $moyenne = $moyenne ? round($moyenne, 1) : 'Pas de notes';
+
                     echo "<div class='col-md-4'>";
                     echo "<div class='card mb-4 shadow-sm'>";
                     echo "<img src='images/" . $row['Image'] . "' class='card-img-top' alt='" . $row['Nom'] . "'>";
                     echo "<div class='card-body'>";
                     echo "<h5 class='card-title'>" . $row['Fabricant'] . " " . $row['Nom'] . "</h5>";
                     echo "<p class='card-text'>" . $row['Description'] . "</p>";
-                    echo "<div class='d-flex justify-content-between align-items-center'>";
+                    echo "<p class='card-text'>Note moyenne: $moyenne étoiles</p>";
+                    echo "<div class='d-flex flex-column'>";
                     echo "<form class='add-to-cart-form' data-product='" . $row['Nom'] . "' data-price='" . $row['Prix'] . "'>";
                     echo "<input type='hidden' name='action' value='ajouter'>";
                     echo "<input type='hidden' name='produit' value='" . $row['Nom'] . "'>";
@@ -110,6 +118,11 @@ session_start();
                     if (isset($_SESSION['admin']) && $_SESSION['admin'] === true) {
                         echo "<button class='btn btn-warning' onclick='editProduct(" . json_encode($row) . ")'>Modifier</button>";
                         echo "<button class='btn btn-danger' onclick='deleteProduct(" . $row['id_modele'] . ")'>Supprimer</button>";
+                    }
+                    if (isset($_SESSION['user_id'])) {
+                        echo "<button class='btn btn-primary' onclick='openModal(" . $row['id_modele'] . ")'>Noter</button>";
+                    } else {
+                        echo "<button class='btn btn-primary' onclick='alert(\"Veuillez vous connecter pour noter ce produit.\")'>Noter</button>";
                     }
                     echo "</div>";
                     echo "</div>";
@@ -141,6 +154,25 @@ session_start();
         <input type="text" id="image" name="image" required>
         <input type="submit" value="Modifier le produit">
     </form>
+    <!-- Fenêtre modale pour noter un produit -->
+    <div id="noteModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Quelle note mettez-vous ?</h2>
+            <form id="noteForm" action="noter_produit.php" method="POST">
+                <input type="hidden" name="produit_id" id="modalProduitId">
+                <label for="modalNote">Note :</label>
+                <select name="note" id="modalNote" required>
+                    <option value="1">1 étoile</option>
+                    <option value="2">2 étoiles</option>
+                    <option value="3">3 étoiles</option>
+                    <option value="4">4 étoiles</option>
+                    <option value="5">5 étoiles</option>
+                </select>
+                <button type="submit">Soumettre</button>
+            </form>
+        </div>
+    </div>
     <script>
         $(document).ready(function() {
             // Initialiser le compteur de panier
@@ -194,6 +226,58 @@ session_start();
                 });
             }
         }
+
+        function openModal(produitId) {
+            document.getElementById('modalProduitId').value = produitId;
+            document.getElementById('noteModal').style.display = 'block';
+        }
+
+        document.querySelector('.close').onclick = function() {
+            document.getElementById('noteModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('noteModal')) {
+                document.getElementById('noteModal').style.display = 'none';
+            }
+        }
     </script>
+    <style>
+        /* Style pour la fenêtre modale */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
 </body>
 </html>

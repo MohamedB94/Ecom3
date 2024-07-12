@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Note</title>
+</head>
+<body>
+    <!-- Formulaire pour noter un produit -->
+    <form action="noter_produit.php" method="POST">
+        <input type="hidden" name="produit_id" value="<?= $produit['id_modele'] ?>">
+        <label for="note">Note :</label>
+        <select name="note" id="note" required>
+            <option value="1">1 étoile</option>
+            <option value="2">2 étoiles</option>
+            <option value="3">3 étoiles</option>
+            <option value="4">4 étoiles</option>
+            <option value="5">5 étoiles</option>
+        </select>
+        <button type="submit">Noter</button>
+    </form>
+</body>
+</html>
