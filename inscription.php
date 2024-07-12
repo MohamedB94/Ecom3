@@ -1,5 +1,9 @@
 <?php
 require 'config.php'; // Inclure le fichier de configuration pour les informations de connexion à la base de données
+require 'vendor/autoload.php'; // Inclure l'autoloader de Composer pour PHPMailer
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 $message = ''; // Initialiser le message qui sera affiché à l'utilisateur
 
@@ -30,6 +34,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Exécuter la requête et vérifier si elle a réussi
     if ($stmt->execute()) {
         $message = "Votre inscription a été réalisée avec succès. Vous pouvez maintenant vous <a href='Connexion.html'>connecter</a>.";
+
+        // Envoyer l'email de bienvenue
+        $mail = new PHPMailer(true);
+        try {
+            // Paramètres du serveur
+            $mail->isSMTP();
+            $mail->Host = 'smtp.office365.com';
+            $mail->SMTPAuth = true;
+            $mail->Username = 'm.benasr@insta.fr'; // Remplacez par votre adresse email
+            $mail->Password = 'Vus01295'; // Remplacez par votre mot de passe
+            $mail->SMTPSecure = 'tls';
+            $mail->Port = 587;
+
+            // Destinataires
+            $mail->setFrom('m.benasr@insta.fr', 'Mohamed'); // Remplacez par votre adresse email et nom
+            $mail->addAddress($email);
+
+            // Contenu de l'email
+            $mail->isHTML(true);
+            $mail->Subject = 'Bienvenue sur notre site';
+            $mail->Body    = "Bienvenue, $prenom $nom. Merci d'avoir rejoint le site.Vous pouvez desormais acheter des produits sur notre site Ecom";
+
+            $mail->send();
+        } catch (Exception $e) {
+            $message .= " L'email de bienvenue n'a pas pu être envoyé. Erreur: {$mail->ErrorInfo}";
+        }
     } else {
         $message = "Erreur: " . $sql . "<br>" . $conn->error;
     }
