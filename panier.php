@@ -1,8 +1,12 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 
 // Démarrer la session
 session_start();
+
 
 // Initialiser le panier s'il n'existe pas
 if (!isset($_SESSION['panier'])) {
@@ -29,7 +33,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['action'])) {
                 unset($_SESSION['panier'][$produit]);
             }
         }
+    } elseif ($action == 'compter') {
+        echo json_encode(array('count' => count($_SESSION['panier'])));
+        exit;
+    } elseif ($action == 'vider') {
+        $_SESSION['panier'] = array();
+        echo json_encode(array('count' => 0, 'panier' => $_SESSION['panier']));
+        exit;
     }
+
+    // Encodez la réponse en JSON
     echo json_encode(array('count' => count($_SESSION['panier']), 'panier' => $_SESSION['panier']));
     exit;
 }
@@ -78,7 +91,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['action'])) {
                 } else {
                     echo '<a href="Connexion.html" class="btn btn-primary mr-2">Connexion</a>';
                     echo '<a href="Inscription.html" class="btn btn-secondary mr-2">Inscription</a>';
-                    echo '<a href="admin_login.php" class="btn btn-success">Connexion Admin</a>';
                 }
                 ?>
                 <!-- Lien vers le panier d'achat -->
@@ -104,11 +116,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['action'])) {
                         echo "<li class='list-group-item d-flex justify-content-between align-items-center'>";
                         echo "$produit - {$details['prix']} € x{$details['quantite']} = $prix_total_produit €";
                         echo "<div class='d-flex'>";
-                        echo "<select name='quantite' class='form-control mr-2'>";
-                        for ($i = 1; $i <= $details['quantite']; $i++) {
-                            echo "<option value='$i'>$i</option>";
-                        }
-                        echo "</select>";
                         echo "<button class='btn btn-danger btn-sm remove-from-cart-btn' data-product='$produit'>Supprimer</button>";
                         echo "</div>";
                         echo "</li>";
@@ -122,6 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['action'])) {
             ?>
         </ul>
         <div class="d-flex justify-content-between mt-4">
+        <button id="vider-panier-btn" class="btn btn-danger">Vider le panier</button>
             <button id="acheter-btn" onclick="verifierConnexion()" class="btn btn-primary" <?php if (empty($_SESSION['panier'])) echo 'disabled'; ?>>Acheter</button>
             <a href="index.php" class="btn btn-secondary">Continuer vos achats</a>
         </div>
@@ -132,6 +140,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['action'])) {
                 var product = $(this).data('product');
                 var quantity = $(this).closest('div').find('select[name="quantite"]').val();
                 removeFromCart(product, quantity);
+            });
+            $('#vider-panier-btn').click(function() {
+                $.get('panier.php', {action: 'vider'}, function(response) {
+                    var data = JSON.parse(response);
+                    $('#cart-count').text(data.count);
+                    updateCartItems(data.panier);
+                });
             });
         });
 
@@ -158,25 +173,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['action'])) {
                         var itemHtml = "<li class='list-group-item d-flex justify-content-between align-items-center'>";
                         itemHtml += produit + " - " + details.prix + " € x" + details.quantite + " = " + prix_total_produit + " €";
                         itemHtml += "<div class='d-flex'>";
-                        itemHtml += "<select name='quantite' class='form-control mr-2'>";
-                        for (var i = 1; i <= details.quantite; i++) {
-                            itemHtml += "<option value='" + i + "'>" + i + "</option>";
-                        }
-                        itemHtml += "</select>";
                         itemHtml += "<button class='btn btn-danger btn-sm remove-from-cart-btn' data-product='" + produit + "'>Supprimer</button>";
                         itemHtml += "</div>";
                         itemHtml += "</li>";
                         cartItems.append(itemHtml);
                     }
                 });
-                cartItems.append("<li class='list-group-item d-flex justify-content-between align-items-center'><strong>Total</strong><strong id='cart-total'>" + total + " €</strong></li>");
-                $('#acheter-btn').removeAttr('disabled');
+                $('#cart-total').text(total + " €");
             }
-            $('.remove-from-cart-btn').click(function() {
-                var product = $(this).data('product');
-                var quantity = $(this).closest('div').find('select[name="quantite"]').val();
-                removeFromCart(product, quantity);
-            });
         }
 
         function verifierConnexion() {
@@ -188,6 +192,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['action'])) {
                 // Code pour procéder à l'achat
                 alert("Achat en cours...");
             <?php endif; ?>
+        }
+
+        function updateCartCount() {
+            $.get('panier.php', {action: 'compter'}, function(response) {
+                var data = JSON.parse(response);
+                $('#cart-count').text(data.count);
+            });
+        }
+
+        function addToCart(product, price, quantity) {
+            $.get('panier.php', {action: 'ajouter', produit: product, prix: price, quantite: quantity}, function(response) {
+                var data = JSON.parse(response);
+                $('#cart-count').text(data.count); // Met à jour le compteur
+            });
         }
     </script>
 </body>

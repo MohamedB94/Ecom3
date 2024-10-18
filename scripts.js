@@ -5,3 +5,12 @@ function addToCart(product, quantity) {
         $('#cart-count').text(currentCount + quantity);
     });
 }
+
+$('.remove-from-cart-btn').click(function() {
+    var produit = $(this).data('product');
+    $.get('panier.php', {action: 'supprimer', produit: produit}, function(response) {
+        var data = JSON.parse(response);
+        $('#cart-count').text(data.count);
+        updateCartItems(data.panier);
+    });
+});

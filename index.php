@@ -72,7 +72,7 @@ session_start();
             // Connexion à la base de données
             $conn = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
             if ($conn->connect_error) {
-                die("Connexion échouée : " . $conn->connect_error);
+                die("Connexion ��chouée : " . $conn->connect_error);
             }
 
             // Préparer la requête SQL pour obtenir tous les produits
