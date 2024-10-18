@@ -47,7 +47,6 @@ session_start();
                 } else {
                     echo '<a href="Connexion.html" class="btn btn-primary mr-2">Connexion</a>';
                     echo '<a href="Inscription.html" class="btn btn-secondary mr-2">Inscription</a>';
-                    echo '<a href="admin_login.php" class="btn btn-success">Connexion Admin</a>';
                 }
                 ?>
                 <!-- Lien vers le panier d'achat -->

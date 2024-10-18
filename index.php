@@ -52,8 +52,8 @@ session_start();
                 } else {
                     echo '<a href="Connexion.html" class="btn btn-primary mr-2">Connexion</a>';
                     echo '<a href="Inscription.html" class="btn btn-secondary mr-2">Inscription</a>';
-                    echo '<a href="admin_login.php" class="btn btn-success">Connexion Admin</a>';
                 }
+                echo '<a href="panier.php" class="btn btn-warning">Panier <span id="cart-count">' . (isset($_SESSION['panier']) ? count($_SESSION['panier']) : 0) . '</span></a>';
                 ?>
                 <?php if (isset($_SESSION['admin']) && $_SESSION['admin'] === true): ?>
                     <a href="admin.php" class="btn btn-success">Ajouter un produit</a>
