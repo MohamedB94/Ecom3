@@ -189,8 +189,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['action'])) {
                     window.location.href = 'Connexion.html';
                 }
             <?php else: ?>
-                // Code pour procéder à l'achat
-                alert("Achat en cours...");
+                // Rediriger vers la page de confirmation d'achat
+                window.location.href = 'achat.php';
             <?php endif; ?>
         }
 

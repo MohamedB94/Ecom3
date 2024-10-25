@@ -1,6 +1,17 @@
 <?php
 session_start();
+
+// Calculer le total à partir du panier
+$total = 0;
+if (isset($_SESSION['panier'])) {
+    foreach ($_SESSION['panier'] as $produit => $details) {
+        if (is_array($details)) {
+            $total += $details['prix'] * $details['quantite'];
+        }
+    }
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -10,15 +21,52 @@ session_start();
     <link rel="stylesheet" href="achat.css">
 </head>
 <body>
-    <h1>Page d'Achat</h1>
-    <p>Merci pour votre achat !</p>
-    <?php
-    if (isset($_SESSION['prenom']) && isset($_SESSION['nom'])) {
-        echo "<a href='index.php' class='btn btn-primary'>Retour à l'accueil</a>";
-    } else {
-        echo "<a href='#' class='btn btn-primary' onclick='alert(\"Veuillez vous connecter pour accéder à cette page.\")'>Retour à l'accueil</a>";
-    }
-    ?>
+    <div class="container">
+        <h1>Page d'Achat</h1>
+        <?php if (isset($_SESSION['prenom']) && isset($_SESSION['nom'])): ?>
+            <form action="traitement_achat.php" method="POST">
+    <div class="form-group">
+        <label for="nom_titulaire">Nom du titulaire de la carte :</label>
+        <input type="text" id="nom_titulaire" name="nom_titulaire" pattern="[A-Za-zÀ-ÿ\s]+" title="Veuillez entrer uniquement des lettres." required>
+    </div>
+    <div class="form-group">
+        <label for="numero_carte">Numéro de carte bancaire :</label>
+        <input type="tel" id="numero_carte" name="numero_carte" pattern="[0-9]*" inputmode="numeric" required>
+        <small>Veuillez entrer uniquement des chiffres.</small>
+    </div>
+    <div class="form-group">
+        <label for="date_expiration">Date d'expiration (MM/AA) :</label>
+        <input type="text" id="date_expiration" name="date_expiration" pattern="^(0[1-9]|1[0-2])\/?([0-9]{2})$" title="Format : MM/AA" required>
+    </div>
+    <div class="form-group">
+        <label for="code_securite">Code de sécurité (CVV) :</label>
+        <input type="text" id="code_securite" name="code_securite" pattern="[0-9]{3,4}" title="Veuillez entrer 3 ou 4 chiffres." required>
+    </div>
+    <button type="submit" class="btn btn-primary">Valider le paiement</button>
+</form>
+            <a href="index.php" class="btn btn-secondary">Retour à l'accueil</a>
+            <div class="total-container">
+                <h2>Total à payer :</h2>
+                <p><?= $total ?> €</p>
+            </div>
+        <?php else: ?>
+            <p>Veuillez vous connecter pour effectuer un achat.</p>
+            <a href="Connexion.html" class="btn btn-primary">Se connecter</a>
+        <?php endif; ?>
+    </div>
 </body>
-</html>
+<script>
+    /*document.addEventListener('DOMContentLoaded', function() {
+    const numeroCarteInput = document.getElementById('numero_carte');
 
+    numeroCarteInput.addEventListener('input', function() {
+        // Supprimer tous les espaces
+        let value = this.value.replace(/\s/g, '');
+        // Ajouter un espace tous les 4 chiffres
+        value = value.replace(/(.{4})/g, '$1 ');
+        // Mettre à jour la valeur de l'input
+        this.value = value.trim();
+    });
+});*/
+</script>
+</html>

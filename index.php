@@ -46,18 +46,18 @@ session_start();
                 <?php
                 if (isset($_SESSION['prenom']) && isset($_SESSION['nom'])) {
                     echo '<a href="deconnexion.php" class="btn btn-danger mr-2">Déconnexion</a>';
-                    echo '<a href="panier.php" class="btn btn-info mr-2">Panier <span id="cart-count" class="badge badge-light">0</span></a>';
-
-                
                 } else {
                     echo '<a href="Connexion.html" class="btn btn-primary mr-2">Connexion</a>';
                     echo '<a href="Inscription.html" class="btn btn-secondary mr-2">Inscription</a>';
                 }
+
+                // Un seul bouton "Panier"
                 echo '<a href="panier.php" class="btn btn-warning">Panier <span id="cart-count">' . (isset($_SESSION['panier']) ? count($_SESSION['panier']) : 0) . '</span></a>';
+
+                if (isset($_SESSION['admin']) && $_SESSION['admin'] === true) {
+                    echo '<a href="admin.php" class="btn btn-success">Ajouter un produit</a>';
+                }
                 ?>
-                <?php if (isset($_SESSION['admin']) && $_SESSION['admin'] === true): ?>
-                    <a href="admin.php" class="btn btn-success">Ajouter un produit</a>
-                <?php endif; ?>
             </div>
         </div>
     </header>
@@ -72,7 +72,7 @@ session_start();
             // Connexion à la base de données
             $conn = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
             if ($conn->connect_error) {
-                die("Connexion ��chouée : " . $conn->connect_error);
+                die("Connexion chouée : " . $conn->connect_error);
             }
 
             // Préparer la requête SQL pour obtenir tous les produits
