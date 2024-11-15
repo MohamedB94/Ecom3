@@ -130,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['action'])) {
         </ul>
         <div class="d-flex justify-content-between mt-4">
         <button id="vider-panier-btn" class="btn btn-danger">Vider le panier</button>
-            <button id="acheter-btn" onclick="verifierConnexion()" class="btn btn-primary" <?php if (empty($_SESSION['panier'])) echo 'disabled'; ?>>Acheter</button>
+            <button id="buyButton" class="btn btn-primary">Acheter</button>
             <a href="index.php" class="btn btn-secondary">Continuer vos achats</a>
         </div>
     </div>
@@ -207,6 +207,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['action'])) {
                 $('#cart-count').text(data.count); // Met à jour le compteur
             });
         }
+
+        document.getElementById('buyButton').addEventListener('click', function() {
+            // Vérifiez si l'utilisateur est connecté
+            <?php if (isset($_SESSION['nom']) && isset($_SESSION['prenom'])): ?>
+                // Redirigez vers Stripe si l'utilisateur est connecté
+                window.location.href = 'https://buy.stripe.com/test_00g29f0bGe8ffYs3cc';
+            <?php else: ?>
+                // Affichez un message d'alerte si l'utilisateur n'est pas connecté
+                alert('Veuillez vous connecter pour acheter.');
+                window.location.href = 'Connexion.html';
+            <?php endif; ?>
+        });
     </script>
 </body>
 </html>

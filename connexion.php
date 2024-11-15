@@ -7,8 +7,8 @@ require 'config.php';
 // Vérification si la méthode de la requête est POST
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Nettoyage des entrées utilisateur
-    $email = htmlspecialchars($_POST['email']);
-    $password = htmlspecialchars($_POST['password']);
+    $email = $_POST['email'];
+    $password = $_POST['password'];
 
     // Tentative de connexion à la base de données
     $conn = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
@@ -18,8 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     // Préparation de la requête SQL pour vérifier l'email de l'utilisateur
-    $sql = "SELECT * FROM utilisateur WHERE email = ?";
-    $stmt = $conn->prepare($sql);
+    $stmt = $conn->prepare("SELECT id_user, nom, prenom, mdp FROM utilisateur WHERE email=?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -30,9 +29,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Vérification du mot de passe
         if (password_verify($password, $user['mdp'])) {
             // Si le mot de passe est correct, initialisation de la session
+            $_SESSION['user_id'] = $user['id_user'];
             $_SESSION['nom'] = $user['nom'];
             $_SESSION['prenom'] = $user['prenom'];
-            $_SESSION['email'] = $user['email'];
+            $_SESSION['email'] = $email;
             // Redirection vers la page d'accueil
             header('Location: index.php');
             exit();

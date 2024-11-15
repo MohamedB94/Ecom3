@@ -1,6 +1,13 @@
 <?php
 session_start();
 
+// Vérifiez si l'utilisateur est connecté
+if (!isset($_SESSION['nom']) || !isset($_SESSION['prenom'])) {
+    // Redirigez vers la page de connexion si l'utilisateur n'est pas connecté
+    header('Location: Connexion.html');
+    exit();
+}
+
 // Calculer le total à partir du panier
 $total = 0;
 if (isset($_SESSION['panier'])) {
@@ -42,7 +49,7 @@ if (isset($_SESSION['panier'])) {
         <label for="code_securite">Code de sécurité (CVV) :</label>
         <input type="text" id="code_securite" name="code_securite" pattern="[0-9]{3,4}" title="Veuillez entrer 3 ou 4 chiffres." required>
     </div>
-    <button type="submit" class="btn btn-primary">Valider le paiement</button>
+    <button id="buyButton" class="btn btn-primary">Valider le paiement avec Stripe</button>
 </form>
             <a href="index.php" class="btn btn-secondary">Retour à l'accueil</a>
             <div class="total-container">
@@ -68,5 +75,17 @@ if (isset($_SESSION['panier'])) {
         this.value = value.trim();
     });
 });*/
+
+    document.getElementById('buyButton').addEventListener('click', function() {
+        // Vérifiez si l'utilisateur est connecté
+        <?php if (isset($_SESSION['nom']) && isset($_SESSION['prenom'])): ?>
+            // Redirigez vers Stripe si l'utilisateur est connecté
+            window.location.href = 'https://buy.stripe.com/test_00g29f0bGe8ffYs3cc';
+        <?php else: ?>
+            // Affichez un message d'alerte si l'utilisateur n'est pas connecté
+            alert('Veuillez vous connecter pour acheter.');
+            window.location.href = 'Connexion.html';
+        <?php endif; ?>
+    });
 </script>
 </html>

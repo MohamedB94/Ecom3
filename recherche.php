@@ -72,7 +72,7 @@ session_start();
             $query = isset($_GET['query']) ? $_GET['query'] : '';
 
             // Préparer la requête SQL pour rechercher les produits
-            $sql = "SELECT * FROM modele WHERE Nom LIKE '%$query%' OR Description LIKE '%$query%'";
+            $sql = "SELECT * FROM modele WHERE Nom LIKE '%$query%' OR Fabricant LIKE '%$query%'";
             $result = $conn->query($sql);
 
             // Vérifier si des résultats ont été trouvés

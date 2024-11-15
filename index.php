@@ -22,6 +22,28 @@ session_start();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Titre de la page -->
     <title>Accueil</title>
+    <style>
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .notification button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+    </style>
 </head>
 <body>
     <header class="bg-primary text-white p-3 d-flex justify-content-between align-items-center">
@@ -112,7 +134,7 @@ session_start();
                     echo "</div>";
                     echo "</form>";
                     if (isset($_SESSION['prenom']) && isset($_SESSION['nom'])) {
-                        echo "<a href='achat.php' class='btn btn-primary'>Acheter</a>";
+                        echo "<a href='redirect_to_stripe.php' class='btn btn-primary'>Acheter</a>";
                     } else {
                         echo "<button class='btn btn-primary acheter-btn' onclick='verifierConnexion()'>Acheter</button>";
                     }
@@ -174,75 +196,22 @@ session_start();
             </form>
         </div>
     </div>
-    <script>
-        $(document).ready(function() {
-            // Initialiser le compteur de panier
-            updateCartCount();
-
-            $('.add-to-cart-btn').click(function() {
-                var form = $(this).closest('.add-to-cart-form');
-                var product = form.data('product');
-                var price = form.data('price');
-                var quantity = form.find('select[name="quantite"]').val();
-                addToCart(product, price, parseInt(quantity));
-            });
-        });
-
-        function addToCart(product, price, quantity) {
-            $.get('panier.php', {action: 'ajouter', produit: product, prix: price, quantite: quantity}, function(response) {
-                var data = JSON.parse(response);
-                updateCartCount();
-            });
-        }
-
-        function updateCartCount() {
-            $.get('panier.php', {action: 'compter'}, function(response) {
-                var data = JSON.parse(response);
-                $('#cart-count').text(data.count);
-            });
-        }
-
-        function verifierConnexion() {
-            if (confirm("Veuillez vous connecter pour acheter. Voulez-vous être redirigé vers la page de connexion ?")) {
-                window.location.href = 'Connexion.html';
+    <?php if (isset($_SESSION['notification'])): ?>
+        <div id="notification" class="notification">
+            <span id="notification-message"><?= $_SESSION['notification'] ?></span>
+            <button onclick="closeNotification()">X</button>
+        </div>
+        <script>
+            function closeNotification() {
+                document.getElementById('notification').style.display = 'none';
             }
-        }
 
-        function editProduct(product) {
-            document.getElementById('id').value = product.id_modele;
-            document.getElementById('produits').value = product.Produits;
-            document.getElementById('nom').value = product.Nom;
-            document.getElementById('fabricant').value = product.Fabricant;
-            document.getElementById('description').value = product.Description;
-            document.getElementById('prix').value = product.Prix;
-            document.getElementById('image').value = product.Image;
-            document.getElementById('action').value = 'modifier';
-            document.getElementById('productForm').scrollIntoView();
-        }
-
-        function deleteProduct(id) {
-            if (confirm("Êtes-vous sûr de vouloir supprimer ce produit ?")) {
-                $.post('admin.php', {id: id, action: 'supprimer'}, function(response) {
-                    location.reload();
-                });
-            }
-        }
-
-        function openModal(produitId) {
-            document.getElementById('modalProduitId').value = produitId;
-            document.getElementById('noteModal').style.display = 'block';
-        }
-
-        document.querySelector('.close').onclick = function() {
-            document.getElementById('noteModal').style.display = 'none';
-        }
-
-        window.onclick = function(event) {
-            if (event.target == document.getElementById('noteModal')) {
-                document.getElementById('noteModal').style.display = 'none';
-            }
-        }
-    </script>
+            setTimeout(() => {
+                closeNotification();
+            }, 3000); // 3 secondes
+        </script>
+        <?php unset($_SESSION['notification']); ?>
+    <?php endif; ?>
     <style>
         /* Style pour la fenêtre modale */
         .modal {
@@ -280,5 +249,77 @@ session_start();
             cursor: pointer;
         }
     </style>
+    <script>
+        $(document).ready(function() {
+            // Initialiser le compteur de panier
+            updateCartCount();
+
+            $('.add-to-cart-btn').click(function() {
+                var form = $(this).closest('.add-to-cart-form');
+                var product = form.data('product');
+                var price = form.data('price');
+                var quantity = form.find('select[name="quantite"]').val();
+                addToCart(product, price, parseInt(quantity));
+            });
+        });
+
+        function addToCart(product, price, quantity) {
+            $.get('panier.php', {action: 'ajouter', produit: product, prix: price, quantite: quantity}, function(response) {
+                var data = JSON.parse(response);
+                updateCartCount();
+            });
+        }
+
+        function updateCartCount() {
+            $.get('panier.php', {action: 'compter'}, function(response) {
+                var data = JSON.parse(response);
+                $('#cart-count').text(data.count);
+            });
+        }
+
+        function verifierConnexion() {
+            <?php if (isset($_SESSION['nom']) && isset($_SESSION['prenom'])): ?>
+                window.location.href = 'https://buy.stripe.com/test_00g29f0bGe8ffYs3cc';
+            <?php else: ?>
+                alert('Veuillez vous connecter pour acheter.');
+                window.location.href = 'Connexion.html';
+            <?php endif; ?>
+        }
+
+        function editProduct(product) {
+            document.getElementById('id').value = product.id_modele;
+            document.getElementById('produits').value = product.Produits;
+            document.getElementById('nom').value = product.Nom;
+            document.getElementById('fabricant').value = product.Fabricant;
+            document.getElementById('description').value = product.Description;
+            document.getElementById('prix').value = product.Prix;
+            document.getElementById('image').value = product.Image;
+            document.getElementById('action').value = 'modifier';
+            document.getElementById('productForm').scrollIntoView();
+        }
+
+        function deleteProduct(id) {
+            if (confirm("Êtes-vous sûr de vouloir supprimer ce produit ?")) {
+                $.post('admin.php', {id: id, action: 'supprimer'}, function(response) {
+                    location.reload();
+                });
+            }
+        }
+
+        function openModal(produitId) {
+            document.getElementById('modalProduitId').value = produitId;
+            document.getElementById('noteModal').style.display = 'block';
+        }
+
+        document.querySelector('.close').onclick = function() {
+            document.getElementById('noteModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('noteModal')) {
+                document.getElementById('noteModal').style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>

@@ -1,14 +1,14 @@
 <?php
-   session_start();
+   session_start(); // mes info se mettent que quand l'user est co
    require 'config.php';
 
    if (!isset($_SESSION['nom']) || !isset($_SESSION['prenom'])) {
        header('Location: Connexion.html');
        exit();
    }
-
+// var message qui se remplira apres 
    $message = '';
-
+// changement mdp
    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
        $nouveau_mdp = htmlspecialchars($_POST['nouveau_mdp']);
        $confirmer_mdp = htmlspecialchars($_POST['confirmer_mdp']);
@@ -70,24 +70,22 @@
            }
 
            .container {
-               background-color: white;
-               padding: 40px;
-               border-radius: 10px;
+               max-width: 600px;
+               margin: 0 auto;
+               padding: 20px;
+               background-color: #f8f9fa;
+               border-radius: 8px;
                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-               width: 400px;
-               margin: 20px auto;
-               text-align: center;
            }
 
-           h1 {
+           h1, h2 {
+               text-align: center;
                color: #333;
-               margin-bottom: 20px;
-               font-size: 24px;
            }
 
            p {
+               font-size: 16px;
                color: #555;
-               margin-bottom: 10px;
            }
 
            form {
@@ -98,28 +96,27 @@
                display: block;
                margin-bottom: 5px;
                font-weight: bold;
-               color: #333;
-               text-align: left;
            }
 
+           input[type="text"],
+           input[type="email"],
            input[type="password"] {
-               width: calc(100% - 20px);
+               width: 100%;
                padding: 10px;
                margin-bottom: 15px;
                border: 1px solid #ccc;
-               border-radius: 5px;
-               font-size: 16px;
+               border-radius: 4px;
            }
 
            button {
+               width: 100%;
+               padding: 10px;
                background-color: #007bff;
                color: white;
                border: none;
-               padding: 10px 20px;
-               border-radius: 5px;
+               border-radius: 4px;
                cursor: pointer;
                font-size: 16px;
-               transition: background-color 0.3s ease;
            }
 
            button:hover {
@@ -139,14 +136,14 @@
            }
        </style>
    </head>
-   <body>
-       <header>
+   <body>     
+       <header> <!-- header a revoir mais fonctionnel -->
            <div>
                <a href="index.php">Accueil</a>
-               <a href="ordinateurs.php">Ordinateurs</a>
-               <a href="composants.php">Composants</a>
-               <a href="peripheriques.php">Périphériques</a>
-               <a href="gaming.php">Gaming</a>
+               <a href="#ordinateurs.php">Ordinateurs</a>
+               <a href="#composants.php">Composants</a>
+               <a href="#peripheriques.php">Périphériques</a>
+               <a href="#gaming.php">Gaming</a>
            </div>
            <div class="search-bar">
                <form id="searchForm" action="recherche.php" method="GET">
@@ -161,21 +158,33 @@
                <?php endif; ?>
                <a href="panier.php" class="btn btn-warning">Panier <span id="cart-count"><?= isset($_SESSION['panier']) ? count($_SESSION['panier']) : 0 ?></span></a>
            </div>
-       </header>
+       </header> <!-- remplissement du mes informations via la session  -->
        <div class="container">
            <h1>Mes Informations</h1>
            <p>Nom: <?= $_SESSION['nom'] ?></p>
            <p>Prénom: <?= $_SESSION['prenom'] ?></p>
            <p>Email: <?= $_SESSION['email'] ?></p>
-
+           <!--  form pour changer le mdp-->
            <h2>Changer le mot de passe</h2>
-           <form action="mes_informations.php" method="POST">
-               <label for="nouveau_mdp">Nouveau mot de passe:</label>
-               <input type="password" id="nouveau_mdp" name="nouveau_mdp" required>
-               <label for="confirmer_mdp">Confirmer le mot de passe:</label>
-               <input type="password" id="confirmer_mdp" name="confirmer_mdp" required>
-               <button type="submit" class="btn btn-primary">Mettre à jour</button>
+           <form action="update_user.php" method="POST">
+               <label for="nom">Nom :</label>
+               <input type="text" id="nom" name="nom" value="<?= htmlspecialchars($_SESSION['nom']) ?>" required>
+
+               <label for="prenom">Prénom :</label>
+               <input type="text" id="prenom" name="prenom" value="<?= htmlspecialchars($_SESSION['prenom']) ?>" required>
+
+               <label for="email">Email :</label>
+               <input type="email" id="email" name="email" value="<?= htmlspecialchars($_SESSION['email']) ?>" required>
+
+               <label for="password">Nouveau mot de passe :</label>
+               <input type="password" id="password" name="password">
+
+               <label for="confirm_password">Confirmer le mot de passe :</label>
+               <input type="password" id="confirm_password" name="confirm_password">
+
+               <button type="submit">Mettre à jour</button>
            </form>
+           <!--  reponse du message en haut soit sa passe soit sa casse(sa met pas a jour)-->
            <p><?= $message ?></p>
        </div>
    </body>
