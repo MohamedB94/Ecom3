@@ -175,3 +175,6 @@ session_start();
     </script>
 </body>
 </html>
+<?php
+include 'header.php';
+?>

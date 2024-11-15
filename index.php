@@ -45,6 +45,7 @@ session_start();
             <div class="user-actions d-flex align-items-center">
                 <?php
                 if (isset($_SESSION['prenom']) && isset($_SESSION['nom'])) {
+                    echo '<a href="mes_informations.php" class="btn btn-info mr-2">Mes Informations</a>';
                     echo '<a href="deconnexion.php" class="btn btn-danger mr-2">Déconnexion</a>';
                 } else {
                     echo '<a href="Connexion.html" class="btn btn-primary mr-2">Connexion</a>';

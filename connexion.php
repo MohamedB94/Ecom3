@@ -32,6 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // Si le mot de passe est correct, initialisation de la session
             $_SESSION['nom'] = $user['nom'];
             $_SESSION['prenom'] = $user['prenom'];
+            $_SESSION['email'] = $user['email'];
             // Redirection vers la page d'accueil
             header('Location: index.php');
             exit();
