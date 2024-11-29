@@ -15,6 +15,8 @@ if ($conn->connect_error) {
     die("Connexion échouée: " . $conn->connect_error); // Arrêt du script si la connexion échoue
 }
 
+$errorMessage = null;
+
 // Vérifier les informations de connexion
 if ($_SERVER['REQUEST_METHOD'] == 'POST') { // Vérifie si la méthode de requête est POST
     $nom = $_POST['nom']; // Récupération du nom depuis le formulaire
@@ -36,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') { // Vérifie si la méthode de requê
         header('Location: index.php'); // Rediriger vers la page d'accueil
         exit();
     } else {
-        echo "Nom, prénom ou mot de passe incorrect"; // Message d'erreur
+        $errorMessage = "Nom, prénom ou mot de passe incorrect"; // Message d'erreur
     }
 
     // Fermer la déclaration
@@ -56,10 +58,21 @@ $conn->close(); // Fermeture de la connexion à la base de données
     <title>Admin - Connexion</title>
     <!-- Lien vers la feuille de style externe -->
     <link rel="stylesheet" href="adminlog.css">
+    <style>
+        .alert {
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>Connexion Administrateur</h1>
+        <?php if (isset($errorMessage)): ?>
+            <div class="alert alert-danger" role="alert">
+                <?= $errorMessage ?>
+            </div>
+        <?php endif; ?>
         <form action="admin_login.php" method="post">
             <label for="nom">Nom:</label>
             <input type="text" id="nom" name="nom" required>

@@ -84,39 +84,35 @@ $conn->close(); // Ferme la connexion à la base de données
         <form action="admin.php" method="post">
             <input type="hidden" name="id" id="id">
             <input type="hidden" name="action" id="action" value="ajouter">
-            <div class="form-group">
-                <label for="produits">Produits:</label>
-                <select id="produits" name="produits" class="form-control" required>
-                    <option value="Ordinateur">Ordinateur</option>
-                    <option value="Périphériques">Périphériques</option>
-                    <option value="Composants">Composants</option>
-                </select>
+            <div class="form-row">
+                <div class="col">
+                    <label for="nom">Nom:</label>
+                    <input type="text" id="nom" name="nom">
+                </div>
+                <div class="col">
+                    <label for="fabricant">Fabricant:</label>
+                    <input type="text" id="fabricant" name="fabricant">
+                </div>
             </div>
-            <div class="form-group">
-                <label for="nom">Nom:</label>
-                <input type="text" id="nom" name="nom" class="form-control" required>
+            <div class="form-row">
+                <div class="col">
+                    <label for="description">Description:</label>
+                    <textarea id="description" name="description"></textarea>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="fabricant">Fabricant:</label>
-                <input type="text" id="fabricant" name="fabricant" class="form-control" required>
+            <div class="form-row">
+                <div class="col">
+                    <label for="prix">Prix:</label>
+                    <input type="text" id="prix" name="prix">
+                </div>
+                <div class="col">
+                    <label for="image">Image (URL):</label>
+                    <input type="text" id="image" name="image">
+                </div>
             </div>
-            <div class="form-group">
-                <label for="description">Description:</label>
-                <textarea id="description" name="description" class="form-control" required></textarea>
-            </div>
-            <div class="form-group">
-                <label for="prix">Prix:</label>
-                <input type="number" id="prix" name="prix" class="form-control" step="0.01" required>
-            </div>
-            <div class="form-group">
-                <label for="image">Image (URL):</label>
-                <input type="text" id="image" name="image" class="form-control" required>
-            </div>
-            <div class="action-buttons">
-                <input type="submit" value="Ajouter le produit" class="btn btn-primary" onclick="document.getElementById('action').value='ajouter'">
-                <input type="submit" value="Modifier le produit" class="btn btn-secondary" onclick="document.getElementById('action').value='modifier'">
-                <input type="submit" value="Supprimer le produit" class="btn btn-danger" onclick="document.getElementById('action').value='supprimer'">
-            </div>
+            <input type="submit" value="Ajouter le produit">
+            <input type="submit" value="Modifier le produit">
+            <input type="submit" value="Supprimer le produit">
         </form>
     </div>
     <script>

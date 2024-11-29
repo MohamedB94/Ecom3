@@ -64,12 +64,12 @@ input[type="submit"] {
     background-color: #007bff;
     color: white;
     border: none;
-    padding: 15px 30px;
+    padding: 8px 16px;
     border-radius: 4px;
     cursor: pointer;
-    width: 100%;
+    width: auto;
     box-sizing: border-box;
-    font-size: 18px;
+    font-size: 14px;
     margin-bottom: 10px;
 }
 
@@ -118,6 +118,9 @@ form {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    padding: 15px;
+    max-width: 600px;
+    margin: auto;
 }
 
 /* Style pour les champs de formulaire en ligne */
@@ -142,4 +145,21 @@ form {
     display: flex;
     justify-content: space-between;
     gap: 10px;
+}
+
+input[type="text"],
+textarea {
+    margin-bottom: 10px;
+    padding: 8px;
+}
+
+/* Style pour les lignes de formulaire */
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.col {
+    flex: 1 1 100px;
 }
