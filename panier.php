@@ -21,10 +21,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['action'])) {
 
     if ($action == 'ajouter') {
         $prix = $_GET['prix'];
+        $image = $_GET['image'];
         if (isset($_SESSION['panier'][$produit])) {
             $_SESSION['panier'][$produit]['quantite'] += $quantite;
         } else {
-            $_SESSION['panier'][$produit] = array('prix' => $prix, 'quantite' => $quantite);
+            $_SESSION['panier'][$produit] = array('prix' => $prix, 'quantite' => $quantite, 'image' => $image);
         }
     } elseif ($action == 'supprimer') {
         if (isset($_SESSION['panier'][$produit])) {
@@ -34,11 +35,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['action'])) {
             }
         }
     } elseif ($action == 'compter') {
-        echo json_encode(array('count' => count($_SESSION['panier'])));
+        echo json_encode(array('count' => count($_SESSION['panier']), 'panier' => $_SESSION['panier']));
         exit;
     } elseif ($action == 'vider') {
         $_SESSION['panier'] = array();
         echo json_encode(array('count' => 0, 'panier' => $_SESSION['panier']));
+        exit;
+    } elseif ($action == 'supprimer_tout') {
+        unset($_SESSION['panier'][$produit]);
+    } elseif ($action == 'charger') {
+        echo json_encode(array('panier' => $_SESSION['panier']));
         exit;
     }
 
@@ -114,6 +120,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['action'])) {
                         $prix_total_produit = $details['prix'] * $details['quantite'];
                         $total += $prix_total_produit;
                         echo "<li class='list-group-item d-flex justify-content-between align-items-center'>";
+                        
+                        // Vérifiez si l'image existe avant de l'afficher
+                        if (isset($details['image']) && !empty($details['image'])) {
+                            echo "<img src='images/{$details['image']}' alt='{$produit}' style='width: 50px; height: 50px; margin-right: 10px;'>";
+                        }
+                        
                         echo "$produit - {$details['prix']} € x{$details['quantite']} = $prix_total_produit €";
                         echo "<div class='d-flex'>";
                         echo "<button class='btn btn-danger btn-sm remove-from-cart-btn' data-product='$produit'>Supprimer</button>";
@@ -136,25 +148,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['action'])) {
     </div>
     <script>
         $(document).ready(function() {
-            $('.remove-from-cart-btn').click(function() {
-                var product = $(this).data('product');
-                var quantity = $(this).closest('div').find('select[name="quantite"]').val();
-                removeFromCart(product, quantity);
+            // Charger les éléments du panier au démarrage
+            $.get('panier.php', {action: 'charger'}, function(response) {
+                var data = JSON.parse(response);
+                updateCartItems(data.panier);
             });
-            $('#vider-panier-btn').click(function() {
-                $.get('panier.php', {action: 'vider'}, function(response) {
+
+            attachEventHandlers();
+        });
+
+        function attachEventHandlers() {
+            $('.increase-quantity-btn').off('click').on('click', function() {
+                var product = $(this).data('product');
+                $.get('panier.php', {action: 'ajouter', produit: product, quantite: 1}, function(response) {
                     var data = JSON.parse(response);
-                    $('#cart-count').text(data.count);
                     updateCartItems(data.panier);
                 });
             });
-        });
 
-        function removeFromCart(product, quantity) {
-            $.get('panier.php', {action: 'supprimer', produit: product, quantite: quantity}, function(response) {
-                var data = JSON.parse(response);
-                $('#cart-count').text(data.count);
-                updateCartItems(data.panier);
+            $('.decrease-quantity-btn').off('click').on('click', function() {
+                var product = $(this).data('product');
+                $.get('panier.php', {action: 'supprimer', produit: product, quantite: 1}, function(response) {
+                    var data = JSON.parse(response);
+                    updateCartItems(data.panier);
+                });
+            });
+
+            $('.remove-from-cart-btn').off('click').on('click', function() {
+                var product = $(this).data('product');
+                $.get('panier.php', {action: 'supprimer_tout', produit: product}, function(response) {
+                    var data = JSON.parse(response);
+                    updateCartItems(data.panier);
+                });
             });
         }
 
@@ -164,23 +189,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['action'])) {
             var total = 0;
             if (Object.keys(panier).length === 0) {
                 cartItems.append("<p>Votre panier est vide.</p>");
-                $('#acheter-btn').attr('disabled', true);
             } else {
                 $.each(panier, function(produit, details) {
                     if (typeof details === 'object') {
                         var prix_total_produit = details.prix * details.quantite;
                         total += prix_total_produit;
                         var itemHtml = "<li class='list-group-item d-flex justify-content-between align-items-center'>";
-                        itemHtml += produit + " - " + details.prix + " € x" + details.quantite + " = " + prix_total_produit + " €";
+                        if (details.image) {
+                            itemHtml += "<img src='images/" + details.image + "' alt='" + produit + "' style='width: 50px; height: 50px; margin-right: 10px;'>";
+                        }
+                        itemHtml += produit + " - " + details.prix + " € x" + details.quantite + " = " + prix_total_produit.toFixed(2) + " €";
                         itemHtml += "<div class='d-flex'>";
+                        itemHtml += "<button class='btn btn-secondary btn-sm decrease-quantity-btn' data-product='" + produit + "'>-</button>";
+                        itemHtml += "<button class='btn btn-secondary btn-sm increase-quantity-btn' data-product='" + produit + "'>+</button>";
                         itemHtml += "<button class='btn btn-danger btn-sm remove-from-cart-btn' data-product='" + produit + "'>Supprimer</button>";
                         itemHtml += "</div>";
                         itemHtml += "</li>";
                         cartItems.append(itemHtml);
                     }
                 });
-                $('#cart-total').text(total + " €");
+                $('#cart-total').text("Total: " + total.toFixed(2) + " €");
             }
+
+            attachEventHandlers(); // Réattacher les événements
         }
 
         function verifierConnexion() {
