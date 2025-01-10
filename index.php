@@ -43,7 +43,23 @@ session_start();
             cursor: pointer;
             margin-left: 10px;
         }
+
+        .favorite-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .favorite-btn .fa-heart {
+            color: grey;
+            font-size: 24px;
+        }
+
+        .favorite-btn .fa-heart.favorited {
+            color: red;
+        }
     </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <header class="bg-primary text-white p-3 d-flex justify-content-between align-items-center">
@@ -55,6 +71,7 @@ session_start();
                 <li class="nav-item"><a class="nav-link text-white" href="composants.php">Composants</a></li>
                 <li class="nav-item"><a class="nav-link text-white" href="peripheriques.php">Périphériques</a></li>
                 <li class="nav-item"><a class="nav-link text-white" href="gaming.php">Gaming</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="favorites.php">Mes Favoris</a></li>
             </ul>
         </nav>
         <!-- Zone de recherche et actions utilisateur -->
@@ -183,6 +200,9 @@ session_start();
                     } else {
                         echo "<button class='btn btn-primary' onclick='alert(\"Veuillez vous connecter pour noter ce produit.\")'>Noter</button>";
                     }
+                    echo "<button class='favorite-btn' data-product-id='" . $row['id_modele'] . "'>";
+                    echo "<i class='fa fa-heart " . (in_array($row['id_modele'], $_SESSION['favorites'] ?? []) ? 'favorited' : '') . "'></i>";
+                    echo "</button>";
                     echo "</div>";
                     echo "</div>";
                     echo "</div>";
@@ -302,6 +322,21 @@ session_start();
                 var product = $(this).data('product');
                 var quantity = $(this).data('quantity');
                 removeFromCart(product, quantity);
+            });
+
+            $('.favorite-btn').click(function() {
+                var button = $(this);
+                var productId = button.data('product-id');
+
+                // Send an AJAX request to update favorites
+                $.post('update_favorites.php', { product_id: productId }, function(response) {
+                    if (response.success) {
+                        // Toggle the heart color
+                        button.find('i').toggleClass('favorited');
+                    } else {
+                        alert('Erreur lors de la mise à jour des favoris.');
+                    }
+                }, 'json');
             });
         });
 
