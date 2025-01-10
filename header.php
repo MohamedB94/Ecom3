@@ -22,62 +22,36 @@ if (session_status() == PHP_SESSION_NONE) {
     <script src="scripts.js"></script>
 </head>
 <body>
-    <?php include 'header.php'; ?>
-    <?php if (isset($_SESSION['admin']) && $_SESSION['admin'] === true): ?>
-        <a href="admin.php">Ajouter un produit</a>
-    <?php endif; ?>
-    <div class="container mt-5">
-        <h1 class="text-center">Votre Panier</h1>
-        <ul class="list-group">
+    <header class="bg-primary text-white p-3 d-flex justify-content-between align-items-center">
+        <nav class="nav">
+            <ul class="nav">
+                <li class="nav-item"><a class="nav-link text-white" href="index.php">Accueil</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="ordinateurs.php">Ordinateurs</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="composants.php">Composants</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="peripheriques.php">Périphériques</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="gaming.php">Gaming</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="favorites.php">Mes Favoris</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="historique.php">Historique des Commandes</a></li>
+            </ul>
+        </nav>
+        <form id="searchForm" action="index.php" method="GET" class="form-inline">
+            <div class="form-group mx-sm-3 mb-2">
+                <label for="search" class="sr-only">Recherche</label>
+                <input type="text" name="search" id="search" class="form-control" placeholder="Rechercher un produit">
+            </div>
+        </form>
+        <div class="user-actions d-flex align-items-center">
             <?php
-            $total = 0;
-            // Afficher les produits dans le panier ou un message si le panier est vide
-            if (empty($_SESSION['panier'])) {
-                echo "<p>Votre panier est vide.</p>"; // Message si le panier est vide
+            if (isset($_SESSION['prenom']) && isset($_SESSION['nom'])) {
+                echo '<a href="mes_informations.php" class="btn btn-info mr-2">Mes Informations</a>';
+                echo '<a href="deconnexion.php" class="btn btn-danger mr-2">Déconnexion</a>';
             } else {
-                // Boucler sur chaque produit du panier pour l'affichage
-                foreach ($_SESSION['panier'] as $produit => $details) {
-                    if (is_array($details)) {
-                        $prix_total_produit = $details['prix'] * $details['quantite'];
-                        $total += $prix_total_produit;
-                        echo "<li class='list-group-item d-flex justify-content-between align-items-center'>";
-                        echo "$produit - {$details['prix']} € x{$details['quantite']} = $prix_total_produit €";
-                        echo "<form action='panier.php' method='POST' class='d-flex'>";
-                        echo "<input type='hidden' name='action' value='supprimer'>";
-                        echo "<input type='hidden' name='produit' value='$produit'>";
-                        echo "<select name='quantite' class='form-control mr-2'>";
-                        for ($i = 1; $i <= $details['quantite']; $i++) {
-                            echo "<option value='$i'>$i</option>";
-                        }
-                        echo "</select>";
-                        echo "<button type='submit' class='btn btn-danger btn-sm'>Supprimer</button>";
-                        echo "</form>";
-                        echo "</li>";
-                    }
-                }
-                echo "<li class='list-group-item d-flex justify-content-between align-items-center'>";
-                echo "<strong>Total</strong>";
-                echo "<strong id='cart-total'>$total </strong>";
-                echo "</li>";
+                echo '<a href="Connexion.html" class="btn btn-primary mr-2">Connexion</a>';
+                echo '<a href="Inscription.html" class="btn btn-secondary mr-2">Inscription</a>';
             }
             ?>
-        </ul>
-        <div class="d-flex justify-content-between mt-4">
-            <button onclick="verifierConnexion()" class="btn btn-primary" <?php if (empty($_SESSION['panier'])) echo 'disabled'; ?>>Acheter</button>
-            <a href="index.php" class="btn btn-secondary">Continuer vos achats</a>
+            <a href="panier.php" class="btn btn-warning">Panier <span id="cart-count"><?= isset($_SESSION['panier']) ? count($_SESSION['panier']) : 0 ?></span></a>
         </div>
-    </div>
-    <script>
-        function verifierConnexion() {
-            <?php if (!isset($_SESSION['nom']) || !isset($_SESSION['prenom'])): ?>
-                if (confirm("Veuillez vous connecter pour acheter. Voulez-vous être redirigé vers la page de connexion ?")) {
-                    window.location.href = 'Connexion.html';
-                }
-            <?php else: ?>
-                // Code pour procéder à l'achat
-                alert("Achat en cours...");
-            <?php endif; ?>
-        }
-    </script>
+    </header>
 </body>
 </html>

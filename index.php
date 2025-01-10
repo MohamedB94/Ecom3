@@ -62,45 +62,7 @@ session_start();
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <header class="bg-primary text-white p-3 d-flex justify-content-between align-items-center">
-        <!-- Navigation principale -->
-        <nav class="nav">
-            <ul class="nav">
-                <li class="nav-item"><a class="nav-link text-white" href="index.php">Accueil</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="ordinateurs.php">Ordinateurs</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="composants.php">Composants</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="peripheriques.php">Périphériques</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="gaming.php">Gaming</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="favorites.php">Mes Favoris</a></li>
-            </ul>
-        </nav>
-        <!-- Zone de recherche et actions utilisateur -->
-        <div class="d-flex align-items-center">
-            <!-- Formulaire de recherche -->
-            <form id="searchForm" action="recherche.php" method="GET" class="form-inline">
-                <input type="text" class="form-control mr-2" name="query" placeholder="Rechercher...">
-            </form>
-            <!-- Actions pour l'utilisateur connecté ou non -->
-            <div class="user-actions d-flex align-items-center">
-                <?php
-                if (isset($_SESSION['prenom']) && isset($_SESSION['nom'])) {
-                    echo '<a href="mes_informations.php" class="btn btn-info mr-2">Mes Informations</a>';
-                    echo '<a href="deconnexion.php" class="btn btn-danger mr-2">Déconnexion</a>';
-                } else {
-                    echo '<a href="Connexion.html" class="btn btn-primary mr-2">Connexion</a>';
-                    echo '<a href="Inscription.html" class="btn btn-secondary mr-2">Inscription</a>';
-                }
-
-                // Un seul bouton "Panier"
-                echo '<a href="panier.php" class="btn btn-warning">Panier <span id="cart-count">' . (isset($_SESSION['panier']) ? count($_SESSION['panier']) : 0) . '</span></a>';
-
-                if (isset($_SESSION['admin']) && $_SESSION['admin'] === true) {
-                    echo '<a href="admin.php" class="btn btn-success">Ajouter un produit</a>';
-                }
-                ?>
-            </div>
-        </div>
-    </header>
+    <?php include 'header.php'; ?>
     <!-- Contenu principal de la page -->
     <div class="container mt-5">
         <h2 class="text-center">Nos Produits</h2>
@@ -139,6 +101,7 @@ session_start();
             $produits = isset($_GET['produits']) ? $_GET['produits'] : '';
             $prix_min = isset($_GET['prix_min']) ? $_GET['prix_min'] : 0;
             $prix_max = isset($_GET['prix_max']) ? $_GET['prix_max'] : 10000;
+            $search = isset($_GET['search']) ? $_GET['search'] : '';
 
             // Préparer la requête SQL pour obtenir les produits
             $sql = "SELECT * FROM modele WHERE 1=1";
@@ -150,6 +113,9 @@ session_start();
             }
             if ($prix_max) {
                 $sql .= " AND prix <= " . (int)$prix_max;
+            }
+            if ($search) {
+                $sql .= " AND (Nom LIKE '%" . $conn->real_escape_string($search) . "%' OR Fabricant LIKE '%" . $conn->real_escape_string($search) . "%' OR Description LIKE '%" . $conn->real_escape_string($search) . "%')";
             }
 
             $result = $conn->query($sql);
@@ -353,8 +319,6 @@ session_start();
                 updateCartCount(data.count); // Mettre à jour le compteur du panier
             });
         }
-
-
 
         function updateCartCount(count) {
             $('#cart-count').text(count);
