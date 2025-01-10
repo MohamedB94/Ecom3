@@ -55,13 +55,17 @@ if ($result->num_rows > 0) {
         echo "<button type='submit'>Noter</button>";
         echo "</form>";
         echo "<button class='btn btn-primary' onclick='openModal(" . $row['id_modele'] . ")'>Noter</button>";
+        echo "<button class='favorite-btn' data-product-id='" . $row['id_modele'] . "'>";
+        echo "<i class='fa fa-heart'></i>";
+        echo "</button>";
         echo "</div>";
         echo "</div>";
         echo "</div>";
     }
 } else {
-    echo "<p class='text-center'>Aucun produit trouvé</p>";
+    echo "<p>Aucun produit trouvé</p>";
 }
+
 $conn->close();
 ?>
 
@@ -85,7 +89,27 @@ $conn->close();
     </div>
 </div>
 
+<!-- Inclusion des icônes FontAwesome pour le cœur -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+
 <script>
+$(document).ready(function() {
+    $('.favorite-btn').click(function() {
+        var button = $(this);
+        var productId = button.data('product-id');
+
+        // Envoyer une requête AJAX pour ajouter/supprimer des favoris
+        $.post('update_favorites.php', { product_id: productId }, function(response) {
+            if (response.success) {
+                // Changer la couleur du cœur
+                button.find('i').toggleClass('favorited');
+            } else {
+                alert('Erreur lors de la mise à jour des favoris.');
+            }
+        }, 'json');
+    });
+});
+
 function openModal(produitId) {
     <?php if (isset($_SESSION['user_id'])): ?>
         document.getElementById('modalProduitId').value = produitId;
@@ -141,5 +165,21 @@ window.onclick = function(event) {
     color: black;
     text-decoration: none;
     cursor: pointer;
+}
+
+/* Style pour le cœur favori */
+.favorite-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.favorite-btn .fa-heart {
+    color: grey;
+    font-size: 24px;
+}
+
+.favorite-btn .fa-heart.favorited {
+    color: red;
 }
 </style>

@@ -210,14 +210,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['action'])) {
         }
 
         function verifierConnexion() {
-            <?php if (!isset($_SESSION['nom']) || !isset($_SESSION['prenom'])): ?>
+            var isLoggedIn = <?php echo isset($_SESSION['nom']) && isset($_SESSION['prenom']) ? 'true' : 'false'; ?>;
+            if (!isLoggedIn) {
                 if (confirm("Veuillez vous connecter pour acheter. Voulez-vous être redirigé vers la page de connexion ?")) {
                     window.location.href = 'Connexion.html';
                 }
-            <?php else: ?>
+            } else {
                 // Rediriger vers la page de confirmation d'achat
                 window.location.href = 'achat.php';
-            <?php endif; ?>
+            }
         }
 
         function updateCartCount() {
@@ -235,15 +236,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['action'])) {
         }
 
         document.getElementById('buyButton').addEventListener('click', function() {
-            // Vérifiez si l'utilisateur est connecté
-            <?php if (isset($_SESSION['nom']) && isset($_SESSION['prenom'])): ?>
-                // Redirigez vers Stripe si l'utilisateur est connecté
-                window.location.href = 'https://buy.stripe.com/test_00g29f0bGe8ffYs3cc';
-            <?php else: ?>
-                // Affichez un message d'alerte si l'utilisateur n'est pas connecté
-                alert('Veuillez vous connecter pour acheter.');
-                window.location.href = 'Connexion.html';
-            <?php endif; ?>
+            verifierConnexion();
         });
     </script>
 </body>
