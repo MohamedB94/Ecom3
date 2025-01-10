@@ -14,7 +14,7 @@ session_start();
     <!-- Inclusion de votre fichier CSS -->
     <link rel="stylesheet" href="styles.css">
     <!-- Inclusion des scripts jQuery et Bootstrap pour la fonctionnalité interactive -->
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="scripts.js"></script>
     <!-- Métadonnées de la page -->
@@ -87,6 +87,26 @@ session_start();
     <!-- Contenu principal de la page -->
     <div class="container mt-5">
         <h2 class="text-center">Nos Produits</h2>
+        <form id="filterForm" action="index.php" method="GET" class="form-inline">
+            <div class="form-group">
+                <label for="produits">Catégorie:</label>
+                <select name="produits" id="produits" class="form-control">
+                    <option value="">Toutes</option>
+                    <option value="Ordinateur">Ordinateurs</option>
+                    <option value="Composant">Composants</option>
+                    <option value="Péripheriques">Périphériques</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="prix_min">Prix Min:</label>
+                <input type="number" name="prix_min" id="prix_min" class="form-control" placeholder="0">
+            </div>
+            <div class="form-group">
+                <label for="prix_max">Prix Max:</label>
+                <input type="number" name="prix_max" id="prix_max" class="form-control" placeholder="1000">
+            </div>
+            <button type="submit" class="btn btn-primary">Filtrer</button>
+        </form>
         <div class="row" id="results">
             <?php
             // Inclure le fichier de configuration
@@ -95,14 +115,29 @@ session_start();
             // Connexion à la base de données
             $conn = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
             if ($conn->connect_error) {
-                die("Connexion chouée : " . $conn->connect_error);
+                die("Connexion échouée : " . $conn->connect_error);
             }
 
-            // Préparer la requête SQL pour obtenir tous les produits
-            $sql = "SELECT * FROM modele";
+            // Récupérer les filtres
+            $produits = isset($_GET['produits']) ? $_GET['produits'] : '';
+            $prix_min = isset($_GET['prix_min']) ? $_GET['prix_min'] : 0;
+            $prix_max = isset($_GET['prix_max']) ? $_GET['prix_max'] : 10000;
+
+            // Préparer la requête SQL pour obtenir les produits
+            $sql = "SELECT * FROM modele WHERE 1=1";
+            if ($produits) {
+                $sql .= " AND Produits = '" . $conn->real_escape_string($produits) . "'";
+            }
+            if ($prix_min) {
+                $sql .= " AND prix >= " . (int)$prix_min;
+            }
+            if ($prix_max) {
+                $sql .= " AND prix <= " . (int)$prix_max;
+            }
+
             $result = $conn->query($sql);
 
-            // Vérifier si des résultats ont été trouvés
+            // Afficher les résultats
             if ($result->num_rows > 0) {
                 while ($row = $result->fetch_assoc()) {
                     // Calculer la moyenne des notes
@@ -118,6 +153,7 @@ session_start();
                     echo "<div class='card-body'>";
                     echo "<h5 class='card-title'>" . $row['Fabricant'] . " " . $row['Nom'] . "</h5>";
                     echo "<p class='card-text'>" . $row['Description'] . "</p>";
+                    echo "<p class='card-text'>Prix: " . $row['Prix'] . " €</p>"; // Afficher le prix du produit
                     echo "<p class='card-text'>Note moyenne: $moyenne étoiles</p>";
                     echo "<div class='d-flex flex-column'>";
                     echo "<form class='add-to-cart-form' data-product='" . $row['Nom'] . "' data-price='" . $row['Prix'] . "'>";
@@ -261,20 +297,32 @@ session_start();
                 var quantity = form.find('select[name="quantite"]').val();
                 addToCart(product, price, parseInt(quantity));
             });
+
+            $('.remove-from-cart-btn').click(function() {
+                var product = $(this).data('product');
+                var quantity = $(this).data('quantity');
+                removeFromCart(product, quantity);
+            });
         });
 
         function addToCart(product, price, quantity) {
             $.get('panier.php', {action: 'ajouter', produit: product, prix: price, quantite: quantity}, function(response) {
                 var data = JSON.parse(response);
-                updateCartCount();
+                updateCartCount(data.count); // Mettre à jour le compteur du panier
             });
         }
 
-        function updateCartCount() {
-            $.get('panier.php', {action: 'compter'}, function(response) {
+        function removeFromCart(product, quantity) {
+            $.get('panier.php', {action: 'supprimer', produit: product, quantite: quantity}, function(response) {
                 var data = JSON.parse(response);
-                $('#cart-count').text(data.count);
+                updateCartCount(data.count); // Mettre à jour le compteur du panier
             });
+        }
+
+
+
+        function updateCartCount(count) {
+            $('#cart-count').text(count);
         }
 
         function verifierConnexion() {

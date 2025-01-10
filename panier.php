@@ -1,12 +1,5 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-
-// Démarrer la session
 session_start();
-
 
 // Initialiser le panier s'il n'existe pas
 if (!isset($_SESSION['panier'])) {
@@ -21,11 +14,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['action'])) {
 
     if ($action == 'ajouter') {
         $prix = $_GET['prix'];
-        $image = $_GET['image'];
         if (isset($_SESSION['panier'][$produit])) {
             $_SESSION['panier'][$produit]['quantite'] += $quantite;
         } else {
-            $_SESSION['panier'][$produit] = array('prix' => $prix, 'quantite' => $quantite, 'image' => $image);
+            $_SESSION['panier'][$produit] = array('prix' => $prix, 'quantite' => $quantite);
         }
     } elseif ($action == 'supprimer') {
         if (isset($_SESSION['panier'][$produit])) {
@@ -34,22 +26,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['action'])) {
                 unset($_SESSION['panier'][$produit]);
             }
         }
-    } elseif ($action == 'compter') {
-        echo json_encode(array('count' => count($_SESSION['panier']), 'panier' => $_SESSION['panier']));
-        exit;
     } elseif ($action == 'vider') {
         $_SESSION['panier'] = array();
-        echo json_encode(array('count' => 0, 'panier' => $_SESSION['panier']));
-        exit;
     } elseif ($action == 'supprimer_tout') {
-        unset($_SESSION['panier'][$produit]);
-    } elseif ($action == 'charger') {
-        echo json_encode(array('panier' => $_SESSION['panier']));
-        exit;
+        if (isset($_SESSION['panier'][$produit])) {
+            unset($_SESSION['panier'][$produit]);
+        }
     }
 
-    // Encodez la réponse en JSON
-    echo json_encode(array('count' => count($_SESSION['panier']), 'panier' => $_SESSION['panier']));
+    // Retourner le nombre d'articles dans le panier
+    echo json_encode(array('count' => array_sum(array_column($_SESSION['panier'], 'quantite')), 'panier' => $_SESSION['panier']));
     exit;
 }
 ?>
@@ -128,6 +114,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['action'])) {
                         
                         echo "$produit - {$details['prix']} € x{$details['quantite']} = $prix_total_produit €";
                         echo "<div class='d-flex'>";
+                        echo "<button class='btn btn-secondary btn-sm decrease-quantity-btn' data-product='$produit'>-</button>";
+                        echo "<button class='btn btn-secondary btn-sm increase-quantity-btn' data-product='$produit'>+</button>";
                         echo "<button class='btn btn-danger btn-sm remove-from-cart-btn' data-product='$produit'>Supprimer</button>";
                         echo "</div>";
                         echo "</li>";
@@ -177,6 +165,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['action'])) {
             $('.remove-from-cart-btn').off('click').on('click', function() {
                 var product = $(this).data('product');
                 $.get('panier.php', {action: 'supprimer_tout', produit: product}, function(response) {
+                    var data = JSON.parse(response);
+                    updateCartItems(data.panier);
+                });
+            });
+
+            $('#vider-panier-btn').off('click').on('click', function() {
+                $.get('panier.php', {action: 'vider'}, function(response) {
                     var data = JSON.parse(response);
                     updateCartItems(data.panier);
                 });
