@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['action'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Titre de la page -->
     <title>Panier</title>
-</head>
+    </head>
 <body>
     <header class="bg-primary text-white p-3 d-flex justify-content-between align-items-center">
         <!-- Navigation principale -->
@@ -106,12 +106,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['action'])) {
                         $prix_total_produit = $details['prix'] * $details['quantite'];
                         $total += $prix_total_produit;
                         echo "<li class='list-group-item d-flex justify-content-between align-items-center'>";
-                        
+
                         // Vérifiez si l'image existe avant de l'afficher
                         if (isset($details['image']) && !empty($details['image'])) {
                             echo "<img src='images/{$details['image']}' alt='{$produit}' style='width: 50px; height: 50px; margin-right: 10px;'>";
                         }
-                        
+
                         echo "$produit - {$details['prix']} € x{$details['quantite']} = $prix_total_produit €";
                         echo "<div class='d-flex'>";
                         echo "<button class='btn btn-secondary btn-sm decrease-quantity-btn' data-product='$produit'>-</button>";
@@ -130,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['action'])) {
         </ul>
         <div class="d-flex justify-content-between mt-4">
         <button id="vider-panier-btn" class="btn btn-danger">Vider le panier</button>
-            <button id="buyButton" class="btn btn-primary">Acheter</button>
+        <button id="buyButton" class="btn btn-primary">Acheter</button>
             <a href="index.php" class="btn btn-secondary">Continuer vos achats</a>
         </div>
     </div>
@@ -206,38 +206,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['action'])) {
                 $('#cart-total').text("Total: " + total.toFixed(2) + " €");
             }
 
-            attachEventHandlers(); // Réattacher les événements
-        }
-
-        function verifierConnexion() {
-            var isLoggedIn = <?php echo isset($_SESSION['nom']) && isset($_SESSION['prenom']) ? 'true' : 'false'; ?>;
-            if (!isLoggedIn) {
-                if (confirm("Veuillez vous connecter pour acheter. Voulez-vous être redirigé vers la page de connexion ?")) {
-                    window.location.href = 'Connexion.html';
-                }
-            } else {
-                // Rediriger vers la page de confirmation d'achat
-                window.location.href = 'achat.php';
-            }
-        }
-
-        function updateCartCount() {
-            $.get('panier.php', {action: 'compter'}, function(response) {
-                var data = JSON.parse(response);
-                $('#cart-count').text(data.count);
-            });
-        }
-
-        function addToCart(product, price, quantity) {
-            $.get('panier.php', {action: 'ajouter', produit: product, prix: price, quantite: quantity}, function(response) {
-                var data = JSON.parse(response);
-                $('#cart-count').text(data.count); // Met à jour le compteur
-            });
-        }
-
-        document.getElementById('buyButton').addEventListener('click', function() {
-            verifierConnexion();
-        });
-    </script>
+attachEventHandlers(); // Réattacher les événements
+}
+function verifierConnexion() {
+var isLoggedIn = <?php echo isset($_SESSION['nom']) && isset($_SESSION['prenom']) ? 'true' : 'false'; ?>;
+if (!isLoggedIn) {
+    if (confirm("Veuillez vous connecter pour acheter. Voulez-vous être redirigé vers la page de connexion ?")) {
+        window.location.href = 'Connexion.html';
+    }
+} else {
+    // Rediriger vers la page de confirmation d'achat
+    window.location.href = 'achat.php';
+}
+}
+function updateCartCount() {
+$.get('panier.php', {action: 'compter'}, function(response) {
+    var data = JSON.parse(response);
+    $('#cart-count').text(data.count);
+});
+}
+function addToCart(product, price, quantity) {
+$.get('panier.php', {action: 'ajouter', produit: product, prix: price, quantite: quantity}, function(response) {
+    var data = JSON.parse(response);
+    $('#cart-count').text(data.count); // Met à jour le compteur
+});
+}
+document.getElementById('buyButton').addEventListener('click', function() {
+verifierConnexion();
+});
+</script>
 </body>
 </html>
