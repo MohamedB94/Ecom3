@@ -19,6 +19,7 @@ if (session_status() == PHP_SESSION_NONE) {
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="styles.css">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="scripts.js"></script>
 </head>
 <body>
@@ -31,7 +32,15 @@ if (session_status() == PHP_SESSION_NONE) {
                 <li class="nav-item"><a class="nav-link text-white" href="peripheriques.php">Périphériques</a></li>
                 <li class="nav-item"><a class="nav-link text-white" href="gaming.php">Gaming</a></li>
                 <li class="nav-item"><a class="nav-link text-white" href="favorites.php">Mes Favoris</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="historique.php">Historique des Commandes</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-white" href="#" id="profilDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Mon Profil
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="profilDropdown">
+                        <a class="dropdown-item" href="mes_informations.php">Mes Informations</a>
+                        <a class="dropdown-item" href="historique.php">Historique des Commandes</a>
+                    </div>
+                </li>
             </ul>
         </nav>
         <form id="searchForm" action="index.php" method="GET" class="form-inline">
@@ -39,6 +48,7 @@ if (session_status() == PHP_SESSION_NONE) {
                 <label for="search" class="sr-only">Recherche</label>
                 <input type="text" name="search" id="search" class="form-control" placeholder="Rechercher un produit">
             </div>
+            <button type="submit" class="btn btn-primary mb-2">Rechercher</button>
         </form>
         <div class="user-actions d-flex align-items-center">
             <?php
