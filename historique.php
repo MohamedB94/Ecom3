@@ -32,7 +32,58 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Historique des Commandes</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 80%;
+    margin: 20px auto;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table, th, td {
+    border: 1px solid #ddd;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+img {
+    vertical-align: middle;
+}
+</style>
 </head>
 <body>
     <?php include 'header.php'; ?>
@@ -41,33 +92,48 @@ $conn->close();
         <?php if (empty($commandes)): ?>
             <p>Vous n'avez pas encore passé de commande.</p>
         <?php else: ?>
-            <?php foreach ($commandes as $commande): ?>
-                <div class="commande">
-                    <h2>Commande #<?= $commande['id_commande'] ?></h2>
-                    <p>Date d'achat : <?= $commande['date_achat'] ?></p>
-                    <p>Date de livraison : <?= $commande['date_livraison'] ?></p>
-                    <p>Adresse de livraison : <?= $commande['adresse_livraison'] ?>, <?= $commande['code_postal'] ?>, <?= $commande['ville'] ?></p>
-                    <p>Complément d'adresse : <?= $commande['complement_adresse'] ?></p>
-                    <p>Prix total : <?= $commande['prix_total'] ?> €</p>
-                    <h3>Produits :</h3>
-                    <ul>
-                        <?php 
-                        $produits = json_decode($commande['produits'], true);
-                        if (is_array($produits)): 
-                            foreach ($produits as $produit): ?>
-                                <li>
-                                    <?php if (isset($produit['image']) && !empty($produit['image'])): ?>
-                                        <img src="images/<?= htmlspecialchars($produit['image']) ?>" alt="<?= htmlspecialchars($produit['nom']) ?>" style="width: 50px; height: 50px;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID Commande</th>
+                        <th>Date d'achat</th>
+                        <th>Date de livraison</th>
+                        <th>Prix total</th>
+                        <th>Produits</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($commandes as $commande): ?>
+                        <tr>
+                            <td><?= $commande['id_commande'] ?></td>
+                            <td><?= $commande['date_achat'] ?></td>
+                            <td><?= $commande['date_livraison'] ?></td>
+                            <td><?= $commande['prix_total'] ?> €</td>
+                            <td>
+                                <ul>
+                                    <?php 
+                                    $produits = json_decode($commande['produits'], true);
+                                    if (is_array($produits)): 
+                                        foreach ($produits as $nom_produit => $details): ?>
+                                            <li>
+                                                <?php
+                                                // Assurez-vous que les informations sur les produits sont disponibles
+                                                $image = isset($details['image']) ? $details['image'] : 'default.png';
+                                                $nom = isset($nom_produit) ? $nom_produit : 'Nom non disponible';
+                                                ?>
+                                                <img src="images/<?php echo htmlspecialchars($image); ?>" alt="<?php echo htmlspecialchars($nom); ?>" />
+                                                <?= htmlspecialchars($nom) ?>
+                                            </li>
+                                        <?php endforeach; 
+                                    else: ?>
+                                        <li>Erreur lors de la récupération des produits.</li>
                                     <?php endif; ?>
-                                    <?= htmlspecialchars($produit['nom']) ?>
-                                </li>
-                            <?php endforeach; 
-                        else: ?>
-                            <li>Erreur lors de la récupération des produits.</li>
-                        <?php endif; ?>
-                    </ul>
-                </div>
-            <?php endforeach; ?>
+                                </ul>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         <?php endif; ?>
     </div>
 </body>

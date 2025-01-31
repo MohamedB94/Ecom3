@@ -7,7 +7,7 @@ if (!isset($_SESSION['nom']) || !isset($_SESSION['prenom'])) {
     exit();
 }
 // var message qui se remplira apres 
-$message = ''; // Initialize the message variable
+$message = ''; // Initialisation de la variable message
 // changement mdp
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $nouveau_mdp = htmlspecialchars($_POST['nouveau_mdp']);
@@ -52,37 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header class="bg-primary text-white p-3 d-flex justify-content-between align-items-center">
-        <!-- Navigation principale -->
-        <nav class="nav">
-            <ul class="nav">
-                <li class="nav-item"><a class="nav-link text-white" href="index.php">Accueil</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="ordinateurs.php">Ordinateurs</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="composants.php">Composants</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="peripheriques.php">Périphériques</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="gaming.php">Gaming</a></li>
-            </ul>
-        </nav>
-        <!-- Zone de recherche et actions utilisateur -->
-        <div class="d-flex align-items-center">
-            <!-- Formulaire de recherche -->
-            <form id="searchForm" action="recherche.php" method="GET" class="form-inline">
-                <input type="text" class="form-control mr-2" name="query" placeholder="Rechercher...">
-            </form>
-            <!-- Actions pour l'utilisateur connecté ou non -->
-            <div class="user-actions d-flex align-items-center">
-                <?php if (isset($_SESSION['prenom']) && isset($_SESSION['nom'])): ?>
-                    <a href="mes_informations.php" class="btn btn-info mr-2">Mes Informations</a>
-                    <a href="deconnexion.php" class="btn btn-danger mr-2">Déconnexion</a>
-                <?php else: ?>
-                    <a href="Connexion.html" class="btn btn-primary mr-2">Connexion</a>
-                    <a href="Inscription.html" class="btn btn-secondary mr-2">Inscription</a>
-                <?php endif; ?>
-                <!-- Lien vers le panier d'achat -->
-                <a href="panier.php" class="btn btn-warning">Panier <span id="cart-count"><?= isset($_SESSION['panier']) ? count($_SESSION['panier']) : 0 ?></span></a>
-            </div>
-        </div>
-    </header>
+    <?php include 'header.php'; ?>
     <!-- Contenu principal de la page -->
     <div class="container mt-5">
         <h1>Mes Informations</h1>

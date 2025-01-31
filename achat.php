@@ -61,31 +61,8 @@ if (isset($_SESSION['panier'])) {
             <a href="Connexion.html" class="btn btn-primary">Se connecter</a>
         <?php endif; ?>
     </div>
+    <form action="verification_payment.php" method="post">
+        <button type="submit">Payer</button>
+    </form>
 </body>
-<script>
-    /*document.addEventListener('DOMContentLoaded', function() {
-    const numeroCarteInput = document.getElementById('numero_carte');
-
-    numeroCarteInput.addEventListener('input', function() {
-        // Supprimer tous les espaces
-        let value = this.value.replace(/\s/g, '');
-        // Ajouter un espace tous les 4 chiffres
-        value = value.replace(/(.{4})/g, '$1 ');
-        // Mettre à jour la valeur de l'input
-        this.value = value.trim();
-    });
-});*/
-
-    document.getElementById('buyButton').addEventListener('click', function() {
-        // Vérifiez si l'utilisateur est connecté
-        <?php if (isset($_SESSION['nom']) && isset($_SESSION['prenom'])): ?>
-            // Redirigez vers Stripe si l'utilisateur est connecté
-            window.location.href = 'https://buy.stripe.com/test_00g29f0bGe8ffYs3cc';
-        <?php else: ?>
-            // Affichez un message d'alerte si l'utilisateur n'est pas connecté
-            alert('Veuillez vous connecter pour acheter.');
-            window.location.href = 'Connexion.html';
-        <?php endif; ?>
-    });
-</script>
 </html>
