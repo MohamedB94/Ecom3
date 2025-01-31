@@ -81,6 +81,8 @@ tr:hover {
 }
 
 img {
+    max-width: 100px;
+    height: auto;
     vertical-align: middle;
 }
 </style>
@@ -113,16 +115,23 @@ img {
                                 <ul>
                                     <?php 
                                     $produits = json_decode($commande['produits'], true);
+                                    // debug line
+                                    echo '<pre>' . print_r($produits, true) . '</pre>';
                                     if (is_array($produits)): 
-                                        foreach ($produits as $nom_produit => $details): ?>
+                                        foreach ($produits as $key => $produit): 
+                                        // si le nom du produit est la cle du tableau
+                                        $nom = is_string($key) ? $key : $produit['nom'] ?? 'Nom non disponible';
+                                        ?>
                                             <li>
-                                                <?php
-                                                // Assurez-vous que les informations sur les produits sont disponibles
-                                                $image = isset($details['image']) ? $details['image'] : 'default.png';
-                                                $nom = isset($nom_produit) ? $nom_produit : 'Nom non disponible';
-                                                ?>
-                                                <img src="images/<?php echo htmlspecialchars($image); ?>" alt="<?php echo htmlspecialchars($nom); ?>" />
-                                                <?= htmlspecialchars($nom) ?>
+                                                <?php if (isset($produit['image']) && !empty($produit['image'])): ?>
+                                                    <img src="images/<?= htmlspecialchars($produit['image']); ?>"
+                                                     alt="<?= htmlspecialchars($produit['nom']); ?>" />
+                                                    <?php else: ?>
+                                                    <p>Image non disponible</p>
+                                                <?php endif; ?>
+                                                <?= htmlspecialchars($nom) ?> -
+                                                Quantite: <?= htmlspecialchars($produit['quantite']) ?> -
+                                                Prix: <?= htmlspecialchars($produit['prix']) ?> €
                                             </li>
                                         <?php endforeach; 
                                     else: ?>
