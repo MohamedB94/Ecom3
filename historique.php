@@ -10,18 +10,27 @@ if (!isset($_SESSION['user_id'])) {
 
 $id_user = $_SESSION['user_id'];
 
-// Récupérez les commandes de l'utilisateur
+// Connexion à la base de données
 $conn = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
 if ($conn->connect_error) {
     die("Connexion échouée: " . $conn->connect_error);
 }
 
+// Récupérez les commandes de l'utilisateur
 $sql = "SELECT * FROM historique_commandes WHERE id_user = ?";
 $stmt = $conn->prepare($sql);
+if ($stmt === false) {
+    die("Erreur de préparation de la requête: " . $conn->error);
+}
 $stmt->bind_param("i", $id_user);
 $stmt->execute();
 $result = $stmt->get_result();
-$commandes = $result->fetch_all(MYSQLI_ASSOC);
+
+$commandes = [];
+while ($row = $result->fetch_assoc()) {
+    $commandes[] = $row;
+}
+
 $stmt->close();
 $conn->close();
 ?>
@@ -31,118 +40,48 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Historique des Commandes</title>
-    <style>
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 0;
-}
-
-.container {
-    width: 80%;
-    margin: 20px auto;
-    background-color: #fff;
-    padding: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-h1 {
-    text-align: center;
-    color: #333;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-
-table, th, td {
-    border: 1px solid #ddd;
-}
-
-th, td {
-    padding: 10px;
-    text-align: left;
-}
-
-th {
-    background-color: #f2f2f2;
-}
-
-tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-tr:hover {
-    background-color: #f1f1f1;
-}
-
-img {
-    max-width: 100px;
-    height: auto;
-    vertical-align: middle;
-}
-</style>
+    <title>Historique des commandes</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
     <?php include 'header.php'; ?>
-    <div class="container">
-        <h1>Historique des Commandes</h1>
-        <?php if (empty($commandes)): ?>
-            <p>Vous n'avez pas encore passé de commande.</p>
+    <div class="container mt-5">
+        <h2 class="text-center">Historique des commandes</h2>
+        <?php if (count($commandes) > 0): ?>
+            <div class="row">
+                <?php foreach ($commandes as $commande): ?>
+                    <div class="col-md-4">
+                        <div class="card mb-4 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">Commande du <?= htmlspecialchars($commande['date_achat']) ?></h5>
+                                <p class="card-text">Prix total: <?= htmlspecialchars($commande['prix_total']) ?> €</p>
+                                <p class="card-text">Date de livraison: <?= htmlspecialchars($commande['date_livraison']) ?></p>
+                                <h6>Produits:</h6>
+                                <?php
+                                $produits = json_decode($commande['produits'], true);
+                                foreach ($produits as $nom_produit => $details) {
+                                    $nom = htmlspecialchars($nom_produit);
+                                    $quantite = isset($details['quantite']) ? htmlspecialchars($details['quantite']) : 'Quantité non disponible';
+                                    $prix = isset($details['prix']) ? htmlspecialchars($details['prix']) : 'Prix non disponible';
+                                    $image_path = isset($details['image_path']) ? htmlspecialchars($details['image_path']) : '';
+
+                                    echo "Nom: " . $nom . "<br>";
+                                    echo "Quantité: " . $quantite . "<br>";
+                                    echo "Prix: " . $prix . " €<br>";
+                                    if ($image_path) {
+                                        echo "Image: <img src='" . $image_path . "' alt='Image du produit' class='img-fluid'><br>";
+                                    } else {
+                                        echo "Image non disponible<br>";
+                                    }
+                                }
+                                ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
         <?php else: ?>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID Commande</th>
-                        <th>Date d'achat</th>
-                        <th>Date de livraison</th>
-                        <th>Prix total</th>
-                        <th>Produits</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($commandes as $commande): ?>
-                        <tr>
-                            <td><?= $commande['id_commande'] ?></td>
-                            <td><?= $commande['date_achat'] ?></td>
-                            <td><?= $commande['date_livraison'] ?></td>
-                            <td><?= $commande['prix_total'] ?> €</td>
-                            <td>
-                                <ul>
-                                    <?php 
-                                    $produits = json_decode($commande['produits'], true);
-                                    // debug line
-                                    echo '<pre>' . print_r($produits, true) . '</pre>';
-                                    if (is_array($produits)): 
-                                        foreach ($produits as $key => $produit): 
-                                        // si le nom du produit est la cle du tableau
-                                        $nom = is_string($key) ? $key : $produit['nom'] ?? 'Nom non disponible';
-                                        ?>
-                                            <li>
-                                                <?php if (isset($produit['image']) && !empty($produit['image'])): ?>
-                                                    <img src="images/<?= htmlspecialchars($produit['image']); ?>"
-                                                     alt="<?= htmlspecialchars($produit['nom']); ?>" />
-                                                    <?php else: ?>
-                                                    <p>Image non disponible</p>
-                                                <?php endif; ?>
-                                                <?= htmlspecialchars($nom) ?> -
-                                                Quantite: <?= htmlspecialchars($produit['quantite']) ?> -
-                                                Prix: <?= htmlspecialchars($produit['prix']) ?> €
-                                            </li>
-                                        <?php endforeach; 
-                                    else: ?>
-                                        <li>Erreur lors de la récupération des produits.</li>
-                                    <?php endif; ?>
-                                </ul>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+            <p class="text-center">Aucune commande trouvée</p>
         <?php endif; ?>
     </div>
 </body>

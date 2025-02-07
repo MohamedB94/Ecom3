@@ -33,8 +33,7 @@ if (session_status() == PHP_SESSION_NONE) {
                 <li class="nav-item"><a class="nav-link text-white" href="peripheriques.php">Périphériques</a></li>
                 <li class="nav-item"><a class="nav-link text-white" href="gaming.php">Gaming</a></li>
                 <li class="nav-item"><a class="nav-link text-white" href="favorites.php">Mes Favoris</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="order_history.php">Historique des Commandes</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="historique.php">a</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="historique.php">Historique des Commandes</a></li>
                 <li class="nav-item dropdown">
                     </div>
                 </li>

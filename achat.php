@@ -61,8 +61,6 @@ if (isset($_SESSION['panier'])) {
             <a href="Connexion.html" class="btn btn-primary">Se connecter</a>
         <?php endif; ?>
     </div>
-    <form action="verification_payment.php" method="post">
-        <button type="submit">Payer</button>
     </form>
 </body>
 </html>

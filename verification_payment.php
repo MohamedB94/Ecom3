@@ -46,11 +46,9 @@ if(isset($_SESSION['panier']) && !empty($_SESSION['panier'])){
                     // redirection vers stripe
                     $stripe_url = "https://buy.stripe.com/test_8wM8xD3nS9RZ6nS001";
                     header("Location: $stripe_url?order_id=$order_id");
-                    // amazonq-ignore-next-line
                     exit();
     } catch (PDOException $e) {
         echo "Erreur : " . $e->getMessage();
-        // amazonq-ignore-next-line
         exit();
     }
 } else {
@@ -77,7 +75,7 @@ if (isset($_GET['order_id'])) {
             echo "Erreur lors de la validation de la commande.";
         }
         // redirection vers l'historique des commandes
-        header("Location: order_history.php");
+        header("Location: historique.php");
         exit();
     }
     catch (PDOException $e) {

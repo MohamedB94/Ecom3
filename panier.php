@@ -14,10 +14,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['action'])) {
 
     if ($action == 'ajouter') {
         $prix = $_GET['prix'];
+        $image_path = $_GET['image_path'];
         if (isset($_SESSION['panier'][$produit])) {
             $_SESSION['panier'][$produit]['quantite'] += $quantite;
         } else {
-            $_SESSION['panier'][$produit] = array('prix' => $prix, 'quantite' => $quantite);
+            $_SESSION['panier'][$produit] = array('prix' => $prix, 'quantite' => $quantite, 'image_path' => $image_path);
         }
     } elseif ($action == 'supprimer') {
         if (isset($_SESSION['panier'][$produit])) {

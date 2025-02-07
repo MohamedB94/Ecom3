@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le : ven. 31 jan. 2025 à 10:57
+-- Généré le : ven. 07 fév. 2025 à 10:41
 -- Version du serveur : 10.4.32-MariaDB
 -- Version de PHP : 8.2.12
 
@@ -44,17 +44,74 @@ INSERT INTO `admins` (`id`, `password`, `nom`, `prenom`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `avis`
+--
+
+CREATE TABLE `avis` (
+  `id` int(11) NOT NULL,
+  `id_modele` int(11) NOT NULL,
+  `product_title` varchar(10) NOT NULL,
+  `nom` varchar(10) NOT NULL,
+  `commentaire` varchar(2048) NOT NULL,
+  `note` int(11) NOT NULL,
+  `date_ajout` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `commande`
 --
 
 CREATE TABLE `commande` (
   `id_commande` int(11) NOT NULL,
   `prix_total` float NOT NULL,
-  `date_commande` date NOT NULL,
-  `status` binary(2) NOT NULL,
+  `date_commande` date NOT NULL DEFAULT current_timestamp(),
+  `status` int(2) NOT NULL,
   `nom_modele` varchar(20) NOT NULL,
-  `image_modele` varchar(80) NOT NULL
+  `image_modele` varchar(80) NOT NULL,
+  `id_user` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `commande`
+--
+
+INSERT INTO `commande` (`id_commande`, `prix_total`, `date_commande`, `status`, `nom_modele`, `image_modele`, `id_user`) VALUES
+(1, 0, '0000-00-00', 0, '', '', 1),
+(2, 0, '0000-00-00', 0, '', '', 1),
+(3, 0, '0000-00-00', 0, '', '', 1),
+(4, 0, '0000-00-00', 0, '', '', 1),
+(5, 0, '0000-00-00', 0, '', '', 1),
+(6, 0, '0000-00-00', 0, '', '', 1),
+(7, 0, '2025-01-31', 0, '', '', 1),
+(8, 0, '2025-01-31', 0, '', '', 1),
+(9, 0, '2025-01-31', 0, '', '', 1),
+(10, 0, '0000-00-00', 0, '', '', 1),
+(11, 0, '0000-00-00', 0, '', '', 1),
+(12, 0, '0000-00-00', 0, '', '', 1),
+(13, 0, '0000-00-00', 0, '', '', 1),
+(14, 0, '0000-00-00', 0, '', '', 1),
+(15, 0, '0000-00-00', 0, '', '', 1),
+(16, 0, '0000-00-00', 0, '', '', 1),
+(17, 0, '0000-00-00', 0, '', '', 1),
+(18, 0, '0000-00-00', 0, '', '', 1),
+(19, 0, '0000-00-00', 1, '', '', 1),
+(20, 0, '0000-00-00', 0, '', '', 1),
+(21, 0, '0000-00-00', 0, '', '', 1),
+(22, 0, '0000-00-00', 0, '', '', 1),
+(23, 0, '0000-00-00', 0, '', '', 1),
+(24, 0, '0000-00-00', 0, '', '', 1),
+(25, 0, '0000-00-00', 0, '', '', 1),
+(26, 0, '0000-00-00', 0, '', '', 1),
+(27, 0, '0000-00-00', 0, '', '', 1),
+(28, 0, '2025-01-31', 0, '', '', 1),
+(29, 0, '2025-01-31', 0, '', '', 1),
+(30, 0, '2025-01-31', 0, '', '', 1),
+(31, 0, '2025-01-31', 0, '', '', 2),
+(32, 0, '2025-01-31', 0, '', '', 1),
+(33, 0, '2025-01-31', 0, '', '', 1),
+(34, 0, '2025-01-31', 0, '', '', 1);
 
 -- --------------------------------------------------------
 
@@ -88,15 +145,18 @@ CREATE TABLE `historique_commandes` (
   `adresse_livraison` varchar(255) NOT NULL,
   `code_postal` varchar(20) NOT NULL,
   `ville` varchar(80) NOT NULL,
-  `complement_adresse` varchar(150) DEFAULT NULL
+  `complement_adresse` varchar(150) DEFAULT NULL,
+  `image_path` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Déchargement des données de la table `historique_commandes`
 --
 
-INSERT INTO `historique_commandes` (`id_commande`, `id_user`, `produits`, `prix_total`, `date_achat`, `date_livraison`, `adresse_livraison`, `code_postal`, `ville`, `complement_adresse`) VALUES
-(2, 1, '[{\"nom\":\"Produit A\",\"prix\":10.00,\"quantite\":2,\"image\":\"produit_a.jpg\"},{\"nom\":\"Produit B\",\"prix\":20.00,\"quantite\":1,\"image\":\"produit_b.jpg\"}]', 40.00, '2023-10-01 00:00:00', '2023-10-08 00:00:00', '123 Rue Exemple', '75001', 'Paris', 'Appartement 4B');
+INSERT INTO `historique_commandes` (`id_commande`, `id_user`, `produits`, `prix_total`, `date_achat`, `date_livraison`, `adresse_livraison`, `code_postal`, `ville`, `complement_adresse`, `image_path`) VALUES
+(2, 1, '[{\"nom\":\" A\",\"prix\":49.99,\"quantite\":2,\"image\":\"produit_a.jpg\"},{\"nom\":\"Produit B\",\"prix\":20.00,\"quantite\":1,\"image\":\"produit_b.jpg\"}]', 40.00, '2023-10-01 00:00:00', '2023-10-08 00:00:00', '123 Rue Exemple', '75001', 'Paris', 'Appartement 4B', NULL),
+(3, 1, '{\"G502 HERO\":{\"prix\":\"49.99\",\"quantite\":\"1\"}}', 49.99, '0000-00-00 00:00:00', '2025-02-07 10:59:29', '', '', '', NULL, NULL),
+(4, 1, '{\"Core i7-14700KF\":{\"prix\":\"499.99\",\"quantite\":\"1\"}}', 499.99, '0000-00-00 00:00:00', '2025-02-07 16:00:03', '', '', '', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -123,19 +183,6 @@ INSERT INTO `modele` (`id_modele`, `Produits`, `Nom`, `Fabricant`, `Description`
 (2, 'Ordinateur', 'Swift X 14', 'Acer', '14.5\" QHD+ OLED - Intel Core i7-13700H - GeForce RTX 4050 - 32 Go DDR5 - SSD 1 To - Windows 11 Pro', 1299.99, 'o1.jfif'),
 (3, 'Composant', 'Core i7-14700KF', 'Intel', 'Processeur Socket 1700 - 20 coeurs - Cache 33 Mo - Raptor Lake refresh - Ventirad non inclus', 499.99, 'c1.jfif'),
 (4, 'Péripheriques', 'BlackShark V2 X USB', 'Razer', 'Casque-micro gamer - Son surround 7.1 - USB-A - Micro avec annulation passive du bruit avancée', 74.99, 'p2.jfif');
-
--- --------------------------------------------------------
-
---
--- Structure de la table `notes`
---
-
-CREATE TABLE `notes` (
-  `id` int(11) NOT NULL,
-  `id_modele` int(11) NOT NULL,
-  `id_user` int(11) NOT NULL,
-  `note` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -211,6 +258,13 @@ ALTER TABLE `admins`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Index pour la table `avis`
+--
+ALTER TABLE `avis`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_avis_modele` (`id_modele`);
+
+--
 -- Index pour la table `commande`
 --
 ALTER TABLE `commande`
@@ -235,14 +289,6 @@ ALTER TABLE `modele`
   ADD PRIMARY KEY (`id_modele`);
 
 --
--- Index pour la table `notes`
---
-ALTER TABLE `notes`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `id_modele` (`id_modele`),
-  ADD KEY `id_user` (`id_user`);
-
---
 -- Index pour la table `panier`
 --
 ALTER TABLE `panier`
@@ -265,10 +311,16 @@ ALTER TABLE `admins`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT pour la table `avis`
+--
+ALTER TABLE `avis`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT pour la table `commande`
 --
 ALTER TABLE `commande`
-  MODIFY `id_commande` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_commande` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- AUTO_INCREMENT pour la table `detail_commande`
@@ -280,19 +332,13 @@ ALTER TABLE `detail_commande`
 -- AUTO_INCREMENT pour la table `historique_commandes`
 --
 ALTER TABLE `historique_commandes`
-  MODIFY `id_commande` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_commande` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT pour la table `modele`
 --
 ALTER TABLE `modele`
   MODIFY `id_modele` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
--- AUTO_INCREMENT pour la table `notes`
---
-ALTER TABLE `notes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT pour la table `panier`
@@ -311,11 +357,10 @@ ALTER TABLE `utilisateur`
 --
 
 --
--- Contraintes pour la table `notes`
+-- Contraintes pour la table `avis`
 --
-ALTER TABLE `notes`
-  ADD CONSTRAINT `notes_ibfk_1` FOREIGN KEY (`id_modele`) REFERENCES `modele` (`id_modele`),
-  ADD CONSTRAINT `notes_ibfk_2` FOREIGN KEY (`id_user`) REFERENCES `utilisateur` (`id_user`);
+ALTER TABLE `avis`
+  ADD CONSTRAINT `fk_avis_modele` FOREIGN KEY (`id_modele`) REFERENCES `modele` (`id_modele`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

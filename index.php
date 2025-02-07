@@ -88,6 +88,9 @@ session_start();
         </form>
         <div class="row" id="results">
             <?php
+            // Définir le fuseau horaire par défaut à Paris
+            date_default_timezone_set('Europe/Paris');
+
             // Inclure le fichier de configuration
             require_once 'config.php';
 
@@ -123,12 +126,6 @@ session_start();
             // Afficher les résultats
             if ($result->num_rows > 0) {
                 while ($row = $result->fetch_assoc()) {
-                    // Calculer la moyenne des notes
-                    $id_modele = $row['id_modele'];
-                    $sql_notes = "SELECT AVG(note) as moyenne FROM notes WHERE id_modele = $id_modele";
-                    $result_notes = $conn->query($sql_notes);
-                    $moyenne = $result_notes->fetch_assoc()['moyenne'];
-                    $moyenne = $moyenne ? round($moyenne, 1) : 'Pas de notes';
 
                     echo "<div class='col-md-4'>";
                     echo "<div class='card mb-4 shadow-sm'>";
@@ -137,12 +134,12 @@ session_start();
                     echo "<h5 class='card-title'>" . $row['Fabricant'] . " " . $row['Nom'] . "</h5>";
                     echo "<p class='card-text'>" . $row['Description'] . "</p>";
                     echo "<p class='card-text'>Prix: " . $row['Prix'] . " €</p>"; // Afficher le prix du produit
-                    echo "<p class='card-text'>Note moyenne: $moyenne étoiles</p>";
                     echo "<div class='d-flex flex-column'>";
                     echo "<form class='add-to-cart-form' data-product='" . $row['Nom'] . "' data-price='" . $row['Prix'] . "'>";
                     echo "<input type='hidden' name='action' value='ajouter'>";
                     echo "<input type='hidden' name='produit' value='" . $row['Nom'] . "'>";
                     echo "<input type='hidden' name='prix' value='" . $row['Prix'] . "'>";
+                    echo "<input type='hidden' name='image_path' value='images/" . $row['Image'] . "'>";
                     echo "<div class='d-flex mb-2'>";
                     echo "<select name='quantite' class='form-control mr-2'>";
                     for ($i = 1; $i <= 5; $i++) {
@@ -161,11 +158,46 @@ session_start();
                         echo "<button class='btn btn-warning' onclick='editProduct(" . json_encode($row) . ")'>Modifier</button>";
                         echo "<button class='btn btn-danger' onclick='deleteProduct(" . $row['id_modele'] . ")'>Supprimer</button>";
                     }
-                    if (isset($_SESSION['user_id'])) {
-                        echo "<button class='btn btn-primary' onclick='openModal(" . $row['id_modele'] . ")'>Noter</button>";
-                    } else {
-                        echo "<button class='btn btn-primary' onclick='alert(\"Veuillez vous connecter pour noter ce produit.\")'>Noter</button>";
+                     if (isset($_SESSION['user_id'])) {
+                        echo '<form action="ajouter_avis.php" method="post" class="avis_form>"';
+                        echo '<input type="hidden" name="id_modele" value="' . htmlspecialchars( $row['id_modele']) . '">';
+                        echo '<input type="hidden" name="nom" value="' . htmlspecialchars( $_SESSION['user_id']) . '">';
+
+                        echo '<label> Commentaire </label>';
+                        echo '<textarea name="commentaire" required></textarea>';
+
+                        echo '<input type="hidden" name="note" id="note_' . htmlspecialchars( $row['id_modele']) .'" value="0">';
+
+                        echo '<div class="star-rating" data-product="' . htmlspecialchars( $row['id_modele']) . '">';
+                        for ($i= 1; $i <= 5; $i++) {
+                          echo '<span class="star" data-value="' . $i . '">⭐</span>';
+                        }
+                        echo '</div>';
+
+                        echo "<button type='submit'>Envoyer l'avis</button>";
+                        echo '</form>';
+                     } else {
+                       echo "<p><a href='connexion.php'>Connectez-vous</a> pour laisser un avis</p>";
+                     }
+                    // Initialize PDO connection
+                    $pdo = new PDO('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USER, DB_PASSWORD);
+                    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                    $stmt = $pdo->prepare('SELECT * FROM avis WHERE id_modele = ? order by date_ajout desc');
+                    $stmt->execute([$row['id_modele']]);
+                    $avis = $stmt->fetchAll();
+                    echo '<div class="avis-section">';
+                    foreach ($avis as $a) {
+                        echo '<div class="avis">';
+                        echo '<strong>' . htmlspecialchars($a['nom']) . '</strong>';
+                        echo '<span>' . str_repeat('⭐', $a['note']) . '</span>';
+                        echo '<p>' . nl2br(htmlspecialchars($a['commentaire'])) . '</p>';
+                        echo '<small>' . $a['date_ajout'] . '</small>';
+                        echo '</div>';
                     }
+                    echo '</div>';
+
+
+
                     echo "<button class='favorite-btn' data-product-id='" . $row['id_modele'] . "'>";
                     echo "<i class='fa fa-heart " . (in_array($row['id_modele'], $_SESSION['favorites'] ?? []) ? 'favorited' : '') . "'></i>";
                     echo "</button>";
@@ -174,6 +206,7 @@ session_start();
                     echo "</div>";
                     echo "</div>";
                 }
+
             } else {
                 echo "<p class='text-center'>Aucun produit trouvé</p>";
             }
@@ -199,25 +232,7 @@ session_start();
         <input type="text" id="image" name="image" required>
         <input type="submit" value="Modifier le produit">
     </form>
-    <!-- Fenêtre modale pour noter un produit -->
-    <div id="noteModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Quelle note mettez-vous ?</h2>
-            <form id="noteForm" action="noter_produit.php" method="POST">
-                <input type="hidden" name="produit_id" id="modalProduitId">
-                <label for="modalNote">Note :</label>
-                <select name="note" id="modalNote" required>
-                    <option value="1">1 étoile</option>
-                    <option value="2">2 étoiles</option>
-                    <option value="3">3 étoiles</option>
-                    <option value="4">4 étoiles</option>
-                    <option value="5">5 étoiles</option>
-                </select>
-                <button type="submit">Soumettre</button>
-            </form>
-        </div>
-    </div>
+    
     <?php if (isset($_SESSION['notification'])): ?>
         <div id="notification" class="notification">
             <span id="notification-message"><?= $_SESSION['notification'] ?></span>
@@ -234,43 +249,6 @@ session_start();
         </script>
         <?php unset($_SESSION['notification']); ?>
     <?php endif; ?>
-    <style>
-        /* Style pour la fenêtre modale */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgb(0,0,0);
-            background-color: rgba(0,0,0,0.4);
-        }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-    </style>
     <script>
         $(document).ready(function() {
             // Initialiser le compteur de panier
@@ -281,7 +259,8 @@ session_start();
                 var product = form.data('product');
                 var price = form.data('price');
                 var quantity = form.find('select[name="quantite"]').val();
-                addToCart(product, price, parseInt(quantity));
+                var imagePath = form.find('input[name="image_path"]').val();
+                addToCart(product, price, parseInt(quantity), imagePath);
             });
 
             $('.remove-from-cart-btn').click(function() {
@@ -306,8 +285,8 @@ session_start();
             });
         });
 
-        function addToCart(product, price, quantity) {
-            $.get('panier.php', {action: 'ajouter', produit: product, prix: price, quantite: quantity}, function(response) {
+        function addToCart(product, price, quantity, imagePath) {
+            $.get('panier.php', {action: 'ajouter', produit: product, prix: price, quantite: quantity, image_path: imagePath}, function(response) {
                 var data = JSON.parse(response);
                 updateCartCount(data.count); // Mettre à jour le compteur du panier
             });
@@ -326,7 +305,7 @@ session_start();
 
         function verifierConnexion() {
             <?php if (isset($_SESSION['nom']) && isset($_SESSION['prenom'])): ?>
-                window.location.href = 'https://buy.stripe.com/test_00g29f0bGe8ffYs3cc';
+                alert('Vous êtes déjà connecté.');
             <?php else: ?>
                 alert('Veuillez vous connecter pour acheter.');
                 window.location.href = 'Connexion.html';
@@ -353,20 +332,27 @@ session_start();
             }
         }
 
-        function openModal(produitId) {
-            document.getElementById('modalProduitId').value = produitId;
-            document.getElementById('noteModal').style.display = 'block';
-        }
+        document.addEventListener("DOMContentLoaded", function(){
 
-        document.querySelector('.close').onclick = function() {
-            document.getElementById('noteModal').style.display = 'none';
-        }
+            document.querySelectorAll('.star-rating').forEach(function(rating){
+                const stars = rating.querySelectorAll(".star");
+                const product = rating.getAttribute('data-product');
+                const noteInput = document.getElementById('note_' + product);
+            
+                stars.forEach(star => {
+                    star.addEventListener("click", function(){
+                        let value = this.getAttribute("data-value");
+                        noteInput.value = value;
 
-        window.onclick = function(event) {
-            if (event.target == document.getElementById('noteModal')) {
-                document.getElementById('noteModal').style.display = 'none';
-            }
-        }
+                        stars.forEach(s=> s.classList.remove("selected"));
+                        for (let i = 0; i < value; i++) {
+                            stars[i].classList.add("selected");
+                        }
+                    });
+                });
+            });
+        });
+
     </script>
 </body>
 </html>
