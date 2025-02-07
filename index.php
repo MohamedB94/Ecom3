@@ -58,6 +58,56 @@ session_start();
         .favorite-btn .fa-heart.favorited {
             color: red;
         }
+
+        .avis-form{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .avis-form textarea{
+            width: 90%;
+            min-height: 80px;
+            margin-top: 5px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: none;
+            font-size: 14px;
+        }
+
+        .star-rating {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+
+        .star {
+            font-size: 24px;
+            color: #ccc;
+            transition: color 0.2;
+        }
+
+        .star:hover,
+        .star.selected {
+            color:gold
+        }
+
+        .product-card {
+            width: auto; /* Ajustez cette valeur pour réduire la taille des cartes */
+            height: auto; /* Ajustez cette valeur pour réduire la taille des cartes */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            margin: 10px;
+            
+        }
+
     </style>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
 </head>
@@ -128,8 +178,10 @@ session_start();
                 while ($row = $result->fetch_assoc()) {
 
                     echo "<div class='col-md-4'>";
-                    echo "<div class='card mb-4 shadow-sm'>";
+                    echo "<div class='card mb-4 shadow-sm product-card'>"; // Ajoutez la classe 'product-card' ici
+                    echo "<a href='produit_detail.php?id=" . $row['id_modele'] . "'>";
                     echo "<img src='images/" . $row['Image'] . "' class='card-img-top' alt='" . $row['Nom'] . "'>";
+                    echo "</a>";
                     echo "<div class='card-body'>";
                     echo "<h5 class='card-title'>" . $row['Fabricant'] . " " . $row['Nom'] . "</h5>";
                     echo "<p class='card-text'>" . $row['Description'] . "</p>";
@@ -158,31 +210,31 @@ session_start();
                         echo "<button class='btn btn-warning' onclick='editProduct(" . json_encode($row) . ")'>Modifier</button>";
                         echo "<button class='btn btn-danger' onclick='deleteProduct(" . $row['id_modele'] . ")'>Supprimer</button>";
                     }
-                     if (isset($_SESSION['user_id'])) {
-                        echo '<form action="ajouter_avis.php" method="post" class="avis_form>"';
-                        echo '<input type="hidden" name="id_modele" value="' . htmlspecialchars( $row['id_modele']) . '">';
-                        echo '<input type="hidden" name="nom" value="' . htmlspecialchars( $_SESSION['user_id']) . '">';
-
+                    if (isset($_SESSION['user_id'])) {
+                        echo '<form action="ajouter_avis.php" method="post" class="avis-form">';
+                        echo '<input type="hidden" name="product_title" value="' . htmlspecialchars($row['Nom']) . '">';
+                        echo '<input type="hidden" name="nom" value="' . htmlspecialchars($_SESSION['prenom']) . '">';
+                        echo '<input type="hidden" name="id_modele" value="' . htmlspecialchars($row['id_modele']) . '">'; // Add this line
                         echo '<label> Commentaire </label>';
                         echo '<textarea name="commentaire" required></textarea>';
+                        
+                        echo '<input type="hidden" name="note" id="note_' . htmlspecialchars($row['id_modele']) . '" value="0">';
 
-                        echo '<input type="hidden" name="note" id="note_' . htmlspecialchars( $row['id_modele']) .'" value="0">';
-
-                        echo '<div class="star-rating" data-product="' . htmlspecialchars( $row['id_modele']) . '">';
-                        for ($i= 1; $i <= 5; $i++) {
-                          echo '<span class="star" data-value="' . $i . '">⭐</span>';
+                        echo '<div class="star-rating" data-product="' . htmlspecialchars($row['id_modele']) . '">';
+                        for ($i = 1; $i <= 5; $i++) {
+                            echo '<span class="star" data-value="' . $i . '">★</span>';
                         }
                         echo '</div>';
 
                         echo "<button type='submit'>Envoyer l'avis</button>";
                         echo '</form>';
-                     } else {
-                       echo "<p><a href='connexion.php'>Connectez-vous</a> pour laisser un avis</p>";
-                     }
+                    } else {
+                        echo "<p><a href='connexion.php'>Connectez-vous</a> pour laisser un avis</p>";
+                    }
                     // Initialize PDO connection
                     $pdo = new PDO('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USER, DB_PASSWORD);
                     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                    $stmt = $pdo->prepare('SELECT * FROM avis WHERE id_modele = ? order by date_ajout desc');
+                    $stmt = $pdo->prepare('SELECT * FROM avis WHERE id_modele = ? ORDER BY date_ajout DESC');
                     $stmt->execute([$row['id_modele']]);
                     $avis = $stmt->fetchAll();
                     echo '<div class="avis-section">';
@@ -191,10 +243,18 @@ session_start();
                         echo '<strong>' . htmlspecialchars($a['nom']) . '</strong>';
                         echo '<span>' . str_repeat('⭐', $a['note']) . '</span>';
                         echo '<p>' . nl2br(htmlspecialchars($a['commentaire'])) . '</p>';
-                        echo '<small>' . $a['date_ajout'] . '</small>';
+                        // Format the date correctly
+                        $date = strtotime($a['date_ajout']);
+                        if ($date && $date > 0) {
+                            $formattedDate = date('d-m-Y', $date);
+                        } else {
+                            $formattedDate = 'Date invalide';
+                        }
+                        echo '<small>' . $formattedDate . '</small>';
                         echo '</div>';
                     }
                     echo '</div>';
+
 
 
 
