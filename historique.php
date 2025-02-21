@@ -16,8 +16,8 @@ if ($conn->connect_error) {
     die("Connexion échouée: " . $conn->connect_error);
 }
 
-// Récupérez les commandes de l'utilisateur
-$sql = "SELECT * FROM historique_commandes WHERE id_user = ?";
+// Récupérez toutes les commandes de l'utilisateur
+$sql = "SELECT * FROM historique_commandes WHERE id_user = ? ORDER BY date_achat DESC";
 $stmt = $conn->prepare($sql);
 if ($stmt === false) {
     die("Erreur de préparation de la requête: " . $conn->error);
@@ -33,6 +33,49 @@ while ($row = $result->fetch_assoc()) {
 
 $stmt->close();
 $conn->close();
+
+// Fonction pour envoyer un email de confirmation de commande
+function sendOrderEmail($to, $subject, $body) {
+    $headers = "MIME-Version: 1.0" . "\r\n";
+    $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+    $headers .= 'From: <no-reply@votre-site.com>' . "\r\n";
+
+    if (mail($to, $subject, $body, $headers)) {
+        echo 'Email envoyé avec succès';
+    } else {
+        echo "L'email n'a pas pu être envoyé.";
+    }
+}
+
+// Exemple d'utilisation
+if (!empty($commandes)) {
+    $commande = $commandes[0]; // La commande la plus récente
+    $to = 'client@example.com'; // Remplacez par l'email du client
+    $subject = 'Confirmation de votre commande';
+
+    // Construire le message HTML
+    $body = "<html><head><title>Confirmation de commande</title></head><body>";
+    $body .= "<h2>Merci pour votre commande</h2>";
+    $body .= "<table border='1' cellspacing='0' cellpadding='5'>";
+    $body .= "<tr><th>Produit</th><th>Prix</th><th>Quantité</th></tr>";
+
+    // Calculer le prix total de la commande
+    $prix_total_commande = $commande['prix_total'];
+    $produits = json_decode($commande['produits'], true);
+    foreach ($produits as $nom_produit => $details) {
+        $nom = htmlspecialchars($nom_produit);
+        $quantite = isset($details['quantite']) ? htmlspecialchars($details['quantite']) : 'Quantité non disponible';
+        $prix = isset($details['prix']) ? htmlspecialchars($details['prix']) : 'Prix non disponible';
+        $body .= "<tr><td>$nom</td><td>$prix €</td><td>$quantite</td></tr>";
+    }
+
+    $body .= "</table>";
+    $body .= "<h3>Prix total: " . number_format($prix_total_commande, 2, ',', '') . "€</h3>";
+    $body .= "<p>Votre commande est en cours de traitement.</p>";
+    $body .= "</body></html>";
+
+    sendOrderEmail($to, $subject, $body);
+}
 ?>
 
 <!DOCTYPE html>
@@ -47,7 +90,7 @@ $conn->close();
     <?php include 'header.php'; ?>
     <div class="container mt-5">
         <h2 class="text-center">Historique des commandes</h2>
-        <?php if (count($commandes) > 0): ?>
+        <?php if (!empty($commandes)): ?>
             <div class="row">
                 <?php foreach ($commandes as $commande): ?>
                     <div class="col-md-4">

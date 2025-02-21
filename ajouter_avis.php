@@ -28,9 +28,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Debugging lines
-    echo "<pre>";
-    print_r($_POST);
-    echo "</pre>";
+    // echo "<pre>";
+    // print_r($_POST);
+    // echo "</pre>";
 
     if (empty($errors)) {
         // recuperer les donnees du formulaire
@@ -38,7 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $nom = $_POST['nom'];
         $commentaire = $_POST['commentaire'];
         $note = intval($_POST['note']);
-        $id_modele = $_POST['id_modele']; // Add this line
+        $id_modele = $_POST['id_modele'];
 
         // Debugging lines
         echo "<pre>";
