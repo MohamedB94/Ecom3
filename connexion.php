@@ -14,7 +14,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $conn = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
     // Gestion des erreurs de connexion
     if ($conn->connect_error) {
-        die("Échec de la connexion : " . $conn->connect_error);
+        $_SESSION['error'] = "Erreur de connexion à la base de données";
+        header('Location: Connexion.html');
+        exit();
     }
 
     // Préparation de la requête SQL pour vérifier l'email de l'utilisateur
@@ -38,11 +40,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             exit();
         } else {
             // Gestion du cas où le mot de passe est incorrect
-            echo "Mot de passe incorrect";
+            $_SESSION['error'] = "Mot de passe incorrect";
+            header('Location: Connexion.html');
+            exit();
         }
     } else {
         // Gestion du cas où aucun utilisateur correspondant n'est trouvé
-        echo "Utilisateur non trouvé";
+        $_SESSION['error'] = "Utilisateur non trouvé";
+        header('Location: Connexion.html');
+        exit();
     }
 
     // Fermeture du statement et de la connexion
