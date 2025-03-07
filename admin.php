@@ -1,5 +1,6 @@
 <?php
 session_start(); // Commence une nouvelle session ou reprend une session existante
+require_once 'config.php';
 
 // Vérifiez si l'utilisateur est connecté en tant qu'administrateur
 if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
@@ -8,15 +9,80 @@ if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
 }
 
 // Connexion à la base de données
-$servername = "localhost"; // Nom du serveur
-$username = "root"; // Nom d'utilisateur pour se connecter à la base de données
-$password = ""; // Mot de passe pour se connecter à la base de données
-$dbname = "ecom"; // Nom de la base de données
-
-$conn = new mysqli($servername, $username, $password, $dbname); // Crée une nouvelle connexion à la base de données
+$conn = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME); // Crée une nouvelle connexion à la base de données
 
 if ($conn->connect_error) {
     die("Connexion échouée: " . $conn->connect_error); // Affiche un message d'erreur si la connexion échoue
+}
+
+// Traitement des actions
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $action = $_POST['action'];
+    $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+
+    switch($action) {
+        case 'modifier':
+            $nom = $_POST['nom'];
+            $fabricant = $_POST['fabricant'];
+            $description = $_POST['description'];
+            $prix = $_POST['prix'];
+            $categorie = $_POST['produits'];
+            
+            // Gestion de l'image
+            $image = $_POST['image_actuelle']; // Garder l'image actuelle par défaut
+            
+            if (isset($_FILES["nouvelle_image"]) && $_FILES["nouvelle_image"]["error"] == 0) {
+                $target_dir = "images/";
+                $target_file = $target_dir . basename($_FILES["nouvelle_image"]["name"]);
+                $imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
+                
+                if(getimagesize($_FILES["nouvelle_image"]["tmp_name"]) !== false) {
+                    if ($_FILES["nouvelle_image"]["size"] <= 500000) {
+                        if($imageFileType == "jpg" || $imageFileType == "png" || $imageFileType == "jpeg" || $imageFileType == "gif" ) {
+                            if (move_uploaded_file($_FILES["nouvelle_image"]["tmp_name"], $target_file)) {
+                                $image = basename($_FILES["nouvelle_image"]["name"]);
+                            }
+                        }
+                    }
+                }
+            }
+
+            $stmt = $conn->prepare("UPDATE modele SET Nom=?, Fabricant=?, Description=?, Prix=?, Produits=?, Image=? WHERE id_modele=?");
+            $stmt->bind_param("sssdssi", $nom, $fabricant, $description, $prix, $categorie, $image, $id);
+            
+            if ($stmt->execute()) {
+                $_SESSION['notification'] = "Produit modifié avec succès";
+            } else {
+                $_SESSION['notification'] = "Erreur lors de la modification du produit";
+            }
+            $stmt->close();
+            break;
+
+        case 'supprimer':
+            // Récupérer l'image avant la suppression
+            $stmt = $conn->prepare("SELECT Image FROM modele WHERE id_modele = ?");
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($row = $result->fetch_assoc()) {
+                $image_path = "images/" . $row['Image'];
+                if (file_exists($image_path)) {
+                    unlink($image_path); // Supprimer l'image du serveur
+                }
+            }
+            $stmt->close();
+
+            // Supprimer le produit
+            $stmt = $conn->prepare("DELETE FROM modele WHERE id_modele = ?");
+            $stmt->bind_param("i", $id);
+            if ($stmt->execute()) {
+                $_SESSION['notification'] = "Produit supprimé avec succès";
+            } else {
+                $_SESSION['notification'] = "Erreur lors de la suppression du produit";
+            }
+            $stmt->close();
+            break;
+    }
 }
 
 // Récupérer tous les produits
@@ -26,32 +92,6 @@ if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
         $produits[] = $row;
     }
-}
-
-// Ajouter, modifier ou supprimer un produit
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
-    $action = $_POST['action'];
-    $produits = $_POST['produits'];
-    $nom = $_POST['nom'];
-    $fabricant = $_POST['fabricant'];
-    $description = $_POST['description'];
-    $prix = $_POST['prix'];
-    $image = $_POST['image'];
-
-    if ($action == 'ajouter') {
-        $stmt = $conn->prepare("INSERT INTO modele (produits, nom, fabricant, description, prix, image) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssssds", $produits, $nom, $fabricant, $description, $prix, $image);
-    } elseif ($action == 'modifier') {
-        $id = $_POST['id'];
-        $stmt = $conn->prepare("UPDATE modele SET produits=?, nom=?, fabricant=?, description=?, prix=?, image=? WHERE id_modele=?");
-        $stmt->bind_param("ssssdsi", $produits, $nom, $fabricant, $description, $prix, $image, $id);
-    } elseif ($action == 'supprimer') {
-        $id = $_POST['id'];
-        $stmt = $conn->prepare("DELETE FROM modele WHERE id_modele=?");
-        $stmt->bind_param("i", $id);
-    }
-    $stmt->execute();
-    $stmt->close();
 }
 
 $conn->close(); // Ferme la connexion à la base de données

@@ -97,15 +97,55 @@ session_start();
         }
 
         .product-card {
-            width: auto; /* Ajustez cette valeur pour réduire la taille des cartes */
-            height: auto; /* Ajustez cette valeur pour réduire la taille des cartes */
+            height: 100%;
             display: flex;
             flex-direction: column;
-            align-items: center;
+        }
+
+        .product-card .card-img-top {
+            height: 200px;
+            object-fit: contain;
+            padding: 15px;
+        }
+
+        .product-card .card-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card .card-title {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-card .card-text {
+            font-size: 0.9rem;
+        }
+
+        .col-md-4 {
+            margin-bottom: 30px;
+        }
+
+        .card {
+            height: 100%;
+        }
+
+        .admin-actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .modal-body .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .admin-header {
+            display: flex;
             justify-content: space-between;
-            padding: 10px;
-            margin: 10px;
-            
+            align-items: center;
+            margin-bottom: 2rem;
         }
 
     </style>
@@ -115,7 +155,12 @@ session_start();
     <?php include 'header.php'; ?>
     <!-- Contenu principal de la page -->
     <div class="container mt-5">
-        <h2 class="text-center">Nos Produits</h2>
+        <div class="admin-header">
+            <h2 class="text-center">Nos Produits</h2>
+            <?php if (isset($_SESSION['admin']) && $_SESSION['admin'] === true): ?>
+                <a href="admin_dashboard.php" class="btn btn-success">Ajouter un nouveau produit</a>
+            <?php endif; ?>
+        </div>
         <form id="filterForm" action="index.php" method="GET" class="form-inline">
             <div class="form-group">
                 <label for="produits">Catégorie:</label>
@@ -206,11 +251,79 @@ session_start();
                     } else {
                         echo "<button class='btn btn-primary acheter-btn' onclick='verifierConnexion()'>Acheter</button>";
                     }
-                    if (isset($_SESSION['admin']) && $_SESSION['admin'] === true) {
-                        echo "<button class='btn btn-warning' onclick='editProduct(" . json_encode($row) . ")'>Modifier</button>";
-                        echo "<button class='btn btn-danger' onclick='deleteProduct(" . $row['id_modele'] . ")'>Supprimer</button>";
-                    }
-                    if (isset($_SESSION['user_id'])) {
+                    if (isset($_SESSION['admin']) && $_SESSION['admin'] === true): ?>
+                        <div class="admin-actions">
+                            <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#editModal<?php echo $row['id_modele']; ?>">
+                                Modifier
+                            </button>
+                            <button type="button" class="btn btn-danger" onclick="confirmerSuppression(<?php echo $row['id_modele']; ?>)">
+                                Supprimer
+                            </button>
+                        </div>
+
+                        <!-- Modal de modification -->
+                        <div class="modal fade" id="editModal<?php echo $row['id_modele']; ?>" tabindex="-1" role="dialog" aria-labelledby="editModalLabel<?php echo $row['id_modele']; ?>" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="editModalLabel<?php echo $row['id_modele']; ?>">Modifier le produit</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <form action="admin.php" method="POST" enctype="multipart/form-data">
+                                        <div class="modal-body">
+                                            <input type="hidden" name="action" value="modifier">
+                                            <input type="hidden" name="id" value="<?php echo $row['id_modele']; ?>">
+                                            <input type="hidden" name="image_actuelle" value="<?php echo $row['Image']; ?>">
+                                            
+                                            <div class="form-group">
+                                                <label for="nom<?php echo $row['id_modele']; ?>">Nom du produit</label>
+                                                <input type="text" class="form-control" id="nom<?php echo $row['id_modele']; ?>" name="nom" value="<?php echo htmlspecialchars($row['Nom']); ?>" required>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="fabricant<?php echo $row['id_modele']; ?>">Fabricant</label>
+                                                <input type="text" class="form-control" id="fabricant<?php echo $row['id_modele']; ?>" name="fabricant" value="<?php echo htmlspecialchars($row['Fabricant']); ?>" required>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="description<?php echo $row['id_modele']; ?>">Description</label>
+                                                <textarea class="form-control" id="description<?php echo $row['id_modele']; ?>" name="description" rows="3" required><?php echo htmlspecialchars($row['Description']); ?></textarea>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="prix<?php echo $row['id_modele']; ?>">Prix</label>
+                                                <input type="number" class="form-control" id="prix<?php echo $row['id_modele']; ?>" name="prix" step="0.01" value="<?php echo $row['Prix']; ?>" required>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="produits<?php echo $row['id_modele']; ?>">Catégorie</label>
+                                                <select class="form-control" id="produits<?php echo $row['id_modele']; ?>" name="produits" required>
+                                                    <option value="Ordinateur" <?php echo $row['Produits'] == 'Ordinateur' ? 'selected' : ''; ?>>Ordinateur</option>
+                                                    <option value="Composant" <?php echo $row['Produits'] == 'Composant' ? 'selected' : ''; ?>>Composant</option>
+                                                    <option value="Péripheriques" <?php echo $row['Produits'] == 'Péripheriques' ? 'selected' : ''; ?>>Périphériques</option>
+                                                    <option value="Gaming" <?php echo $row['Produits'] == 'Gaming' ? 'selected' : ''; ?>>Gaming</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>Image actuelle</label>
+                                                <img src="images/<?php echo $row['Image']; ?>" alt="Image actuelle" style="max-width: 100px; display: block; margin-bottom: 10px;">
+                                                <label for="nouvelle_image<?php echo $row['id_modele']; ?>">Nouvelle image (optionnel)</label>
+                                                <input type="file" class="form-control-file" id="nouvelle_image<?php echo $row['id_modele']; ?>" name="nouvelle_image" accept="image/*">
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                                            <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                    <?php if (isset($_SESSION['user_id'])) {
                         echo '<form action="ajouter_avis.php" method="post" class="avis-form">';
                         echo '<input type="hidden" name="product_title" value="' . htmlspecialchars($row['Nom']) . '">';
                         echo '<input type="hidden" name="nom" value="' . htmlspecialchars($_SESSION['prenom']) . '">';
@@ -274,24 +387,6 @@ session_start();
             ?>
         </div>
     </div>
-    <!-- Formulaire pour modifier un produit -->
-    <form id="productForm" action="admin.php" method="post" style="display: none;">
-        <input type="hidden" name="id" id="id">
-        <input type="hidden" name="action" id="action" value="modifier">
-        <label for="produits">Produits:</label>
-        <input type="text" id="produits" name="produits" required>
-        <label for="nom">Nom:</label>
-        <input type="text" id="nom" name="nom" required>
-        <label for="fabricant">Fabricant:</label>
-        <input type="text" id="fabricant" name="fabricant" required>
-        <label for="description">Description:</label>
-        <textarea id="description" name="description" required></textarea>
-        <label for="prix">Prix:</label>
-        <input type="number" id="prix" name="prix" step="0.01" required>
-        <label for="image">Image (URL):</label>
-        <input type="text" id="image" name="image" required>
-        <input type="submit" value="Modifier le produit">
-    </form>
     
     <?php if (isset($_SESSION['notification'])): ?>
         <div id="notification" class="notification">
@@ -413,6 +508,30 @@ session_start();
             });
         });
 
+        function confirmerSuppression(id) {
+            if (confirm("Êtes-vous sûr de vouloir supprimer ce produit ?")) {
+                var form = document.createElement('form');
+                form.method = 'POST';
+                form.action = 'admin.php';
+                
+                var actionInput = document.createElement('input');
+                actionInput.type = 'hidden';
+                actionInput.name = 'action';
+                actionInput.value = 'supprimer';
+                
+                var idInput = document.createElement('input');
+                idInput.type = 'hidden';
+                idInput.name = 'id';
+                idInput.value = id;
+                
+                form.appendChild(actionInput);
+                form.appendChild(idInput);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
     </script>
+    <?php include 'footer.php'?>
 </body>
 </html>
